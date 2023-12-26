@@ -1,14 +1,9 @@
-import com.aventstack.extentreports.Status;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.equalTo;
 
+import io.restassured.path.json.JsonPath;
 import org.testng.annotations.Test;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import reporter.ExtentManager;
-import reporter.ExtentTestManager;
 
 
 import java.util.ArrayList;
@@ -17,25 +12,51 @@ import java.util.Random;
 
 public class RestAssuredTestOne {
 
+    String key = "qaclick123";
+    String place_id = null;
+    Random random = new Random();
+
     // Given - All input details
     // When - Submit the API
     // Then - Validate the response
 
     @Test
-    public void TestOne(String[] args) {
+    public void TestOne() {
         RestAssured.baseURI = "https://rahulshettyacademy.com/maps/api/place/";
-        given().log().all().queryParam("key","qaclick123").header("Content-Type","application/json")
-                .body(createRequestBodyForAddPlace()).
-        when().post("add/json").
-        then().log().all().assertThat().statusCode(200).body("scope", equalTo("APP"));
+        String addResponse = given().log().all()
+                .queryParam("key",key).header("Content-Type","application/json")
+                .body(createRequestBodyForAddPlace())
+        .when().post("add/json")
+        .then().assertThat().statusCode(200).body("scope", equalTo("APP")).extract().response().asString();
 
-        ExtentTestManager.getExtentTest().log(Status.INFO, "Additional information...");
+        JsonPath jsonPath = new JsonPath(addResponse);
+        place_id = jsonPath.getString("place_id");
+        System.out.println("Place Id : "+place_id);
 
-        ExtentTestManager.getExtentTest().pass("Test passed!");
-        ExtentManager.flush(); // Flush ExtentReports
+        // Update Place
+        given().log().all()
+        .queryParam("key","qaclick123").header("Content-Type","application/json")
+        .body(createRequestBodyForUpdatePlace())
+        .when().put("update/json")
+        .then().assertThat().log().all().statusCode(200).body("msg", equalTo("Address successfully updated"));
+
+
+        // Get Place
+        String getPlaceResponse = given().log().all()
+                .queryParam("key",key).queryParam("place_id", place_id)
+                .when().get("get/json")
+                .then().assertThat().log().all().statusCode(200).extract().response().asString();
+
+        JsonPath jsonPath1 = new JsonPath(getPlaceResponse);
+        String actualAddress = jsonPath1.getString("address");
+        System.out.println("The Actual Address in Get Place after Update Place Response is : "+actualAddress);
+
+//        ExtentTestManager.getExtentTest().log(Status.INFO, "Additional information...");
+//        ExtentTestManager.getExtentTest().pass("Test passed!");
+//        ExtentManager.flush(); // Flush ExtentReports
     }
 
-    public static Object createRequestBodyForAddPlace(){
+    public Object createRequestBodyForAddPlace(){
         HashMap<String, Object> requestBodyAddPlace = new HashMap<>();
         HashMap<String, Object> location = new HashMap<>();
         ArrayList<String> typesData = new ArrayList<>();
@@ -43,17 +64,16 @@ public class RestAssuredTestOne {
         typesData.add("shoePark");
         typesData.add("shoe");
 
-        Random random = new Random();
         double latitude = random.nextDouble() * 180 - 90; // Generate a random value between -90 and 90
         double longitude = random.nextDouble() * 360 - 180; // Generate a random value between -180 and 180
-
         location.put("lat", latitude);
         location.put("lng", longitude);
+        String placeNumber = String.valueOf(1+random.nextInt(99));
 
         requestBodyAddPlace.put("location", location);
         requestBodyAddPlace.put("types", typesData);
         requestBodyAddPlace.put("accuracy", 50);
-        requestBodyAddPlace.put("name", "Frontline House");
+        requestBodyAddPlace.put("name", placeNumber+", Frontline House");
         requestBodyAddPlace.put("phone_number", "(+91)0987654321");
         requestBodyAddPlace.put("address", random.nextInt(100) +", side layout, cohen 09");
         requestBodyAddPlace.put("website", "http://google.com");
@@ -62,6 +82,16 @@ public class RestAssuredTestOne {
         return requestBodyAddPlace;
     }
 
+    @Test
+    public Object createRequestBodyForUpdatePlace() {
+        HashMap<String, Object> requestBodyUpdatePlace = new HashMap<>();
+
+        requestBodyUpdatePlace.put("place_id", place_id);
+        requestBodyUpdatePlace.put("address", "BackLine House");
+        requestBodyUpdatePlace.put("key",key);
+
+        return requestBodyUpdatePlace;
+    }
 //    @Test
 //    public void printJson() throws JsonProcessingException {
 //
