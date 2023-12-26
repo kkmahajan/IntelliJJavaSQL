@@ -1,8 +1,12 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.path.json.JsonPath;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 
@@ -92,13 +96,53 @@ public class RestAssuredTestOne {
 
         return requestBodyUpdatePlace;
     }
-//    @Test
-//    public void printJson() throws JsonProcessingException {
-//
-//        Object obj = createRequestBodyForAddPlace();
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-//        System.out.println("Following is the JSON Format of the HashMap :\n"+objectMapper.writeValueAsString(obj));
-//    }
+    @Test
+    public void printPrettyJson() throws JsonProcessingException {
+
+        Object obj = createRequestBodyForAddPlace();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        System.out.println("Following is the JSON Format of the HashMap :\n"+objectMapper.writeValueAsString(obj));
+    }
+
+    @DataProvider(name = "LatLongData")
+    public Object[][] latLongData(){
+        return new Object[][] {{-1.086320854785452, -124.684349682051},{-6.086320854745452, -124.984149684051},{-1.086322354745452, -124.6834684051}};
+    }
+
+    @Test(dataProvider = "LatLongData")
+    public void addPlaceWithDataProvider(double latitude, double longitude){
+
+        HashMap<String, Object> requestBodyAddPlace = new HashMap<>();
+        HashMap<String, Object> location = new HashMap<>();
+        ArrayList<String> typesData = new ArrayList<>();
+
+        typesData.add("shoePark");
+        typesData.add("shoe");
+
+        location.put("lat", latitude);
+        location.put("lng", longitude);
+        String placeNumber = String.valueOf(1+random.nextInt(99));
+
+        requestBodyAddPlace.put("location", location);
+        requestBodyAddPlace.put("types", typesData);
+        requestBodyAddPlace.put("accuracy", 50);
+        requestBodyAddPlace.put("name", placeNumber+", Frontline House");
+        requestBodyAddPlace.put("phone_number", "(+91)0987654321");
+        requestBodyAddPlace.put("address", random.nextInt(100) +", side layout, cohen 09");
+        requestBodyAddPlace.put("website", "http://google.com");
+        requestBodyAddPlace.put("language", "English-EN");
+
+
+        RestAssured.baseURI = "https://rahulshettyacademy.com/maps/api/place/";
+        String addResponseDataProvider = given().log().all()
+                .queryParam("key",key).header("Content-Type","application/json")
+                .body(requestBodyAddPlace)
+                .when().post("add/json")
+                .then().assertThat().statusCode(200).body("scope", equalTo("APP")).extract().response().asString();
+
+        JsonPath jsonPath = new JsonPath(addResponseDataProvider);
+        System.out.println(jsonPath);
+    }
 }
