@@ -12,7 +12,6 @@ target/
 *.iws
 *.iml
 *.ipr
-DummyDirectory/
 
 ### Eclipse ###
 .apt_generated
