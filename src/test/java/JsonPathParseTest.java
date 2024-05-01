@@ -69,4 +69,5 @@ public class JsonPathParseTest {
         // Only new String works in this case to convert Byte Data into String. String.valueOf works only for int. long, obj etc
         System.out.println(new String(Files.readAllBytes(Paths.get("C:\\Users\\admin\\IdeaProjects\\myFirstIntelliJProject\\src\\test\\testData\\CoursePrice.json"))));
     }
+
 }
