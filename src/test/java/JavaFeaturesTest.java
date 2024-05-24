@@ -71,4 +71,5 @@ public class JavaFeaturesTest {
         Stream<Integer> stream3 = stream1.map(n->n*2);
         stream3.forEach(consumer1);
     }
+    
 }
