@@ -42,7 +42,7 @@ public class JavaFeaturesTest {
         //Print using for each with custom lambda function
         System.out.println("Print numbers + 1 using foreach with customs made lambda function accept with type Integer");
 
-        Consumer<Integer> consumer = new Consumer<Integer>() {
+        Consumer<Integer> consumer = new Consumer<>() {
             @Override
             public void accept(Integer integer) {
                 System.out.println(integer + 1);
@@ -71,5 +71,5 @@ public class JavaFeaturesTest {
         Stream<Integer> stream3 = stream1.map(n->n*2);
         stream3.forEach(consumer1);
     }
-    
+
 }
