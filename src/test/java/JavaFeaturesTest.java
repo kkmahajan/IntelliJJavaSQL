@@ -41,7 +41,6 @@ public class JavaFeaturesTest {
 
         //Print using for each with custom lambda function
         System.out.println("Print numbers + 1 using foreach with customs made lambda function accept with type Integer");
-
         Consumer<Integer> consumer = new Consumer<>() {
             @Override
             public void accept(Integer integer) {
@@ -54,10 +53,8 @@ public class JavaFeaturesTest {
         System.out.println("print using custom made lambda function");
         Consumer<Integer> consumer1 = System.out::println;
         Consumer<Integer> consumer2 = n -> System.out.println(n + 1);
-
         integerList.forEach(consumer1);
         integerList.forEach(consumer2);
-
 
         // Print using Streams
         System.out.println("Print using Streams and above mentioned foreach lambda function to add + 1");
@@ -68,8 +65,12 @@ public class JavaFeaturesTest {
         System.out.println("Print using Streams along with the defined method only even numbers from the list");
         Stream<Integer> stream2 = integerList.stream();
         Stream<Integer> stream1 = stream2.filter(n -> n % 2 == 0);
-        Stream<Integer> stream3 = stream1.map(n->n*2);
+        Stream<Integer> stream3 = stream1.map(n -> n * 2);
         stream3.forEach(consumer1);
-    }
 
+        // Use Streams with Map, Filter, Reduce
+        System.out.println("Print using Map, Filter, Reduce");
+        int result = integerList.stream().filter(n -> n % 2 == 0).map(n -> n * 2).reduce(0, Integer::sum);
+        System.out.println("Result of the list being filtered with even numbers and \nthen mapped to *2 function and reduced to c + e logic :" + result);
+    }
 }
