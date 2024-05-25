@@ -7,8 +7,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -129,5 +131,39 @@ public class RestAssuredTestOne {
 
         JsonPath jsonPath = new JsonPath(addResponseDataProvider);
         System.out.println(jsonPath);
+    }
+
+    @Test
+    public void testStringArray() {
+        String[] stringArray = {"Kaustubh", "Mahajan", "Shruti", "Mahajan"};
+
+        //Prints only the object name reference
+        System.out.println(stringArray);
+
+        //Prints the actual content of the String Array
+        System.out.println(Arrays.toString(stringArray));
+
+        String[][] string2darray = {stringArray, stringArray};
+        System.out.println(Arrays.deepToString(string2darray));
+
+        System.out.println("Below is a Stream of String");
+        Stream<String> stringStream = Arrays.stream(stringArray);
+        stringStream.forEach(s -> System.out.println(s + " " + 1234));
+    }
+
+    @Test
+    public void testVarInJava(){
+        var a = "Goggle";
+        var b = 232;
+        var c = true;
+        var d = 4.3;
+        var e = 'A';
+        var f = new String[]{"K", "K", "M"};
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(c);
+        System.out.println(d);
+        System.out.println(e);
+        System.out.println(Arrays.toString(f));
     }
 }
