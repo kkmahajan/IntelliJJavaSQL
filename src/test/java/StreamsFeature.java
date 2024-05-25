@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class JavaFeaturesTest {
+public class StreamsFeature {
 
     @Test
     public void testStreams() {
