@@ -6,10 +6,7 @@ import io.restassured.path.json.JsonPath;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
@@ -152,7 +149,7 @@ public class RestAssuredTestOne {
     }
 
     @Test
-    public void testVarInJava(){
+    public void testVarInJava() {
         var a = "Goggle";
         var b = 232;
         var c = true;
@@ -165,5 +162,94 @@ public class RestAssuredTestOne {
         System.out.println(d);
         System.out.println(e);
         System.out.println(Arrays.toString(f));
+    }
+
+    @Test
+    public void testCode() {
+        int a = 10;
+        Integer b = a;
+        System.out.println(b);
+
+        Integer c = 20;
+        int d = c;
+        System.out.println(d);
+    }
+
+    @Test
+    public void testFinal() {
+        final int a = 120;
+        final int b;
+        b = 123;
+        //a=321; b = 121; will get error on these lines as "a" cannot be assigned any new value
+        System.out.println(a + " " + b);
+        System.out.println(a + b);
+    }
+
+    @Test
+    public void testMath() {
+        System.out.println(Math.random());
+        System.out.println((int) (Math.random() * 3) + 1);
+    }
+
+    @Test
+    public void testStreams(){
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(0); list.add(10); list.add(5); list.add(20); ;list.add(25); list.add(15);
+        System.out.println("Before filtering : "+list);
+        List<Integer> newList = list.stream().filter(I -> I % 2 == 0).toList();
+        System.out.println("After Filtering : "+newList);
+
+        List<Integer> divBy5 = list.stream().filter(I -> I % 5 == 0).toList();
+        System.out.println("Filtering by divisible by 5 : "+divBy5);
+
+        List<Integer> temp = list.stream().filter(I-> I.toString().contains("0")).toList();
+        System.out.println("Filtering by Zero in number :"+temp);
+
+        List<Integer> multiplyBy2 = list.stream().map(I -> I * 2).toList();
+        System.out.println("Multiple each element in list by 2 : "+multiplyBy2);
+        System.out.println("Multiple each element in list by 2 & count : "+multiplyBy2.stream().count());
+        System.out.println("Multiple each element in list by 2 & count : "+ (long) multiplyBy2.size());
+        System.out.println("Multiple each element in list by 2 & sorted : "+multiplyBy2.stream().sorted().toList());
+    }
+
+    @Test
+    public void testHashSet(){
+        HashSet<Integer> re = new HashSet<>();
+        re.add(1);
+        re.add(1);
+        re.add(12);
+//        re.add(null);  Does not work with Iterator
+        re.add(34);
+        re.add(0);
+        re.add(46);
+        re.add(48);
+        re.add(31);
+        System.out.println(re);
+        Iterator<Integer> i = re.iterator();
+        while(i.hasNext()){
+            Integer I = i.next();
+            if(I == 0){
+                I = i.next();
+            }
+            if(I % 2 == 0){
+                System.out.println(I+" is an even number");
+            }else {
+                i.remove();
+            }
+        }
+        System.out.println(re);
+    }
+
+    @Test
+    public void testHashMap(){
+        Map<Object, String> mymap = new HashMap<>();
+        mymap.put(null,"null");
+        mymap.put(3,"3");
+        mymap.put(5,"5");
+        mymap.put(0,"0");
+        mymap.put("Zero","0");
+        System.out.println(mymap.get(null));
+        mymap.remove(null);
+        System.out.println(mymap);
     }
 }
