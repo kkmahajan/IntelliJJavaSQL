@@ -218,7 +218,7 @@ public class RestAssuredTestOne {
         re.add(1);
         re.add(1);
         re.add(12);
-//        re.add(null);  Does not work with Iterator
+//        re.add(null);  Does not work with Iterator, but works normally
         re.add(34);
         re.add(0);
         re.add(46);
