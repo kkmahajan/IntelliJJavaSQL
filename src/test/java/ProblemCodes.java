@@ -13,24 +13,6 @@ public class ProblemCodes {
         return (root1 * root1 == 5 * n * n + 4) || (root2 * root2 == 5 * n * n - 4);
     }
 
-    @Test
-    public void checkFibonacciNumber(){
-
-        int n = 2;
-        if(isFibonacci(n) == true){
-            System.out.println("Given number is fibonacci");
-        }else{
-            System.out.println("Given number is not in fibonacci");
-        }
-
-        if(isFibonacciJava(n) == true){
-            System.out.println("Java : Given number is fibonacci");
-        }else{
-            System.out.println("Java : Given number is not in fibonacci");
-        }
-    }
-
-
     public static boolean isFibonacciJava(int n) {
         if (n < 0) {
             return false; // Negative numbers are not in the Fibonacci series
@@ -49,11 +31,27 @@ public class ProblemCodes {
         return false;
     }
 
+    @Test
+    public void checkFibonacciNumber() {
+
+        int n = 2;
+        if (isFibonacci(n)) {
+            System.out.println("Given number is fibonacci");
+        } else {
+            System.out.println("Given number is not in fibonacci");
+        }
+
+        if (isFibonacciJava(n)) {
+            System.out.println("Java : Given number is fibonacci");
+        } else {
+            System.out.println("Java : Given number is not in fibonacci");
+        }
+    }
 
     @Test
-    public void testSqrt(){
-        System.out.println((int)Math.sqrt(5 * 2 * 2 + 4));
-        System.out.println((int)Math.sqrt(5 * 2 * 2 - 4));
-        System.out.println((int)Math.sqrt(16*16));
+    public void testSqrt() {
+        System.out.println((int) Math.sqrt(5 * 2 * 2 + 4));
+        System.out.println((int) Math.sqrt(5 * 2 * 2 - 4));
+        System.out.println((int) Math.sqrt(16 * 16));
     }
 }
