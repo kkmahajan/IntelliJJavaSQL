@@ -1,10 +1,13 @@
 package org.example;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
     public static void main(String[] args) {
 
+        final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
         DriverManager.setLoginTimeout(10);
         try {
             String connectionUrl = "jdbc:mysql://localhost:3306/dbo";
@@ -16,8 +19,7 @@ public class Main {
                 System.out.println(resultSet.getString("empId"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Connection Failed.");
+            LOGGER.log(Level.SEVERE, "SQL Exception occurred", e);
         }
     }
 }
