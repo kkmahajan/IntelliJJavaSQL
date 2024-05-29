@@ -4,6 +4,8 @@ import java.sql.*;
 
 public class Main {
     public static void main(String[] args) {
+
+        DriverManager.setLoginTimeout(10);
         try {
             String connectionUrl = "jdbc:mysql://localhost:3306/dbo";
             Connection con = DriverManager.getConnection(connectionUrl, "root", "admin");
