@@ -192,28 +192,33 @@ public class RestAssuredTestOne {
     }
 
     @Test
-    public void testStreams(){
+    public void testStreams() {
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(0); list.add(10); list.add(5); list.add(20); list.add(25); list.add(15);
-        System.out.println("Before filtering : "+list);
+        list.add(0);
+        list.add(10);
+        list.add(5);
+        list.add(20);
+        list.add(25);
+        list.add(15);
+        System.out.println("Before filtering : " + list);
         List<Integer> newList = list.stream().filter(I -> I % 2 == 0).toList();
-        System.out.println("After Filtering : "+newList);
+        System.out.println("After Filtering : " + newList);
 
         List<Integer> divBy5 = list.stream().filter(I -> I % 5 == 0).toList();
-        System.out.println("Filtering by divisible by 5 : "+divBy5);
+        System.out.println("Filtering by divisible by 5 : " + divBy5);
 
-        List<Integer> temp = list.stream().filter(I-> I.toString().contains("0")).toList();
-        System.out.println("Filtering by Zero in number :"+temp);
+        List<Integer> temp = list.stream().filter(I -> I.toString().contains("0")).toList();
+        System.out.println("Filtering by Zero in number :" + temp);
 
         List<Integer> multiplyBy2 = list.stream().map(I -> I * 2).toList();
-        System.out.println("Multiple each element in list by 2 : "+multiplyBy2);
-        System.out.println("Multiple each element in list by 2 & count : "+ (long) multiplyBy2.size());
-        System.out.println("Multiple each element in list by 2 & count : "+ (long) multiplyBy2.size());
-        System.out.println("Multiple each element in list by 2 & sorted : "+multiplyBy2.stream().sorted().toList());
+        System.out.println("Multiple each element in list by 2 : " + multiplyBy2);
+        System.out.println("Multiple each element in list by 2 & count : " + (long) multiplyBy2.size());
+        System.out.println("Multiple each element in list by 2 & count : " + (long) multiplyBy2.size());
+        System.out.println("Multiple each element in list by 2 & sorted : " + multiplyBy2.stream().sorted().toList());
     }
 
     @Test
-    public void testHashSet(){
+    public void testHashSet() {
         HashSet<Integer> re = new HashSet<>();
         re.add(1);
         re.add(1);
@@ -226,14 +231,14 @@ public class RestAssuredTestOne {
         re.add(31);
         System.out.println(re);
         Iterator<Integer> i = re.iterator();
-        while(i.hasNext()){
+        while (i.hasNext()) {
             Integer I = i.next();
-            if(I == 0){
+            if (I == 0) {
                 I = i.next();
             }
-            if(I % 2 == 0){
-                System.out.println(I+" is an even number");
-            }else {
+            if (I % 2 == 0) {
+                System.out.println(I + " is an even number");
+            } else {
                 i.remove();
             }
         }
@@ -241,20 +246,20 @@ public class RestAssuredTestOne {
     }
 
     @Test
-    public void testHashMap(){
+    public void testHashMap() {
         Map<Object, String> mymap = new HashMap<>();
-        mymap.put(null,"null");
-        mymap.put(3,"3");
-        mymap.put(5,"5");
-        mymap.put(0,"0");
-        mymap.put("Zero","0");
+        mymap.put(null, "null");
+        mymap.put(3, "3");
+        mymap.put(5, "5");
+        mymap.put(0, "0");
+        mymap.put("Zero", "0");
         System.out.println(mymap.get(null));
         mymap.remove(null);
         System.out.println(mymap);
     }
 
     @Test
-    public void testEnvVariables(){
+    public void testEnvVariables() {
         System.out.println(System.getenv());
     }
 }

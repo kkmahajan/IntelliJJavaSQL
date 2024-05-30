@@ -55,7 +55,6 @@ public class DatabaseConnection {
             // getFirst() method can be used to get the first element from a list
             System.out.println("First Row : " + resultList.getFirst());
             System.out.println("First Emp Name : " + resultList.getFirst().get("EmpName"));
-            System.out.println("First Emp Id Class : " + resultList.getFirst().get("EmpId").getClass());
             System.out.println("First Emp Id : " + resultList.getFirst().get("EmpId"));
 
             // Following code will print the result of the result set one by one.
