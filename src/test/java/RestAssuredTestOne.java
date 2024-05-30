@@ -194,7 +194,7 @@ public class RestAssuredTestOne {
     @Test
     public void testStreams(){
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(0); list.add(10); list.add(5); list.add(20); ;list.add(25); list.add(15);
+        list.add(0); list.add(10); list.add(5); list.add(20); list.add(25); list.add(15);
         System.out.println("Before filtering : "+list);
         List<Integer> newList = list.stream().filter(I -> I % 2 == 0).toList();
         System.out.println("After Filtering : "+newList);
@@ -207,7 +207,7 @@ public class RestAssuredTestOne {
 
         List<Integer> multiplyBy2 = list.stream().map(I -> I * 2).toList();
         System.out.println("Multiple each element in list by 2 : "+multiplyBy2);
-        System.out.println("Multiple each element in list by 2 & count : "+multiplyBy2.stream().count());
+        System.out.println("Multiple each element in list by 2 & count : "+ (long) multiplyBy2.size());
         System.out.println("Multiple each element in list by 2 & count : "+ (long) multiplyBy2.size());
         System.out.println("Multiple each element in list by 2 & sorted : "+multiplyBy2.stream().sorted().toList());
     }
