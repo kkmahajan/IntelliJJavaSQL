@@ -6,10 +6,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.example.TestData.COURSE_JSON_FILE_PATH;
+
 public class JsonPathParseTest {
 
     // As API is not yet available, mocked response can be used to complete automation for such APIs
     JsonPath jsonPath = new JsonPath(Payload.coursePrice());
+
+    public JsonPathParseTest() throws IOException {
+    }
 
     // Print no of courses returned by API
     @Test
@@ -66,8 +71,15 @@ public class JsonPathParseTest {
 
     @Test
     public void readJsonFileIntoAString() throws IOException {
-        // Only new String works in this case to convert Byte Data into String. String.valueOf works only for int. long, obj etc
-        System.out.println(new String(Files.readAllBytes(Paths.get("C:\\Users\\admin\\IdeaProjects\\myFirstIntelliJProject\\src\\test\\testData\\CoursePrice.json"))));
-    }
 
+        // Only new String works in this case to convert Byte Data into String.
+        // String.valueOf works only for int. long, obj etc
+        try {
+            System.out.println(new String(Files.readAllBytes(Paths.get(COURSE_JSON_FILE_PATH))));
+        } catch (IOException ioe) {
+            ioe.getCause();
+            ioe.getStackTrace();
+            ioe.printStackTrace();
+        }
+    }
 }
