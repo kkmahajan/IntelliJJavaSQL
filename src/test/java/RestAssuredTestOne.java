@@ -252,4 +252,9 @@ public class RestAssuredTestOne {
         mymap.remove(null);
         System.out.println(mymap);
     }
+
+    @Test
+    public void testEnvVariables(){
+        System.out.println(System.getenv());
+    }
 }
