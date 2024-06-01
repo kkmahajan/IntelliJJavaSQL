@@ -48,10 +48,26 @@ public class ProblemCodes {
         }
     }
 
+
+    /**
+     * This test method demonstrates the usage of the Math.sqrt() method.
+     * It calculates the square root of different numbers and prints the results.
+     */
     @Test
     public void testSqrt() {
-        System.out.println((int) Math.sqrt(5 * 2 * 2 + 4));
-        System.out.println((int) Math.sqrt(5 * 2 * 2 - 4));
-        System.out.println((int) Math.sqrt(16 * 16));
+        // Calculate and print the square root of 5 * 2 * 2 + 4
+        int num1 = 5 * 2 * 2 + 4;
+        int sqrt1 = (int) Math.sqrt(num1);
+        System.out.println(sqrt1);
+
+        // Calculate and print the square root of 5 * 2 * 2 - 4
+        int num2 = 5 * 2 * 2 - 4;
+        int sqrt2 = (int) Math.sqrt(num2);
+        System.out.println(sqrt2);
+
+        // Calculate and print the square root of 16 * 16
+        int num3 = 16 * 16;
+        int sqrt3 = (int) Math.sqrt(num3);
+        System.out.println(sqrt3);
     }
 }

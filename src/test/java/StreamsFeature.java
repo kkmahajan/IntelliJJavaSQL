@@ -7,6 +7,9 @@ import java.util.stream.Stream;
 
 public class StreamsFeature {
 
+    /**
+     * Tests various methods of printing and manipulating a list of integers using Streams.
+     */
     @Test
     public void testStreams() {
 
