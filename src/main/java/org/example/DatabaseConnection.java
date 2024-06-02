@@ -1,75 +1,32 @@
 package org.example;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import static org.example.TestData.*;
+import static org.example.TestData.EMP_SEL;
+
 
 public class DatabaseConnection {
 
-    /**
-     * Following method is creating a connection to the database.
-     *
-     * @param args as String[]
-     */
+    static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
+    static DatabaseUtils dbUtils = new DatabaseUtils();
+
     public static void main(String[] args) {
 
-        final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
-        String dbUser = System.getenv(SQL_DB_USERNAME);
-        String dbKey = System.getenv(SQL_DB_KEY);
-        Properties prop = new Properties();
-        FileInputStream fileInputStream;
-        try {
-            fileInputStream = new FileInputStream(PROP_FILE_PATH);
-            prop.load(fileInputStream);
-        } catch (FileNotFoundException fife) {
-            LOGGER.log(Level.SEVERE, "Properties file not found on the given location", fife);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Properties prop = propertiesFileSetup.setProperties();
+        List<Map<String, Object>> result = dbUtils.executeQuery(prop, EMP_SEL);
 
-        DriverManager.setLoginTimeout(10);
-        try {
-            String connectionUrl = prop.getProperty(sqlDbUrl);
-            Connection con = DriverManager.getConnection(connectionUrl, dbUser, dbKey);
-            Statement statement = con.createStatement();
-            ResultSet resultSet = statement.executeQuery(EMP_SEL);
-            List<Map<String, Object>> resultList = new ArrayList<>();
+        System.out.println("Employee Id : " + result.getFirst().get("EMP_ID"));
+        System.out.println("Employee Name : " + result.getFirst().get("EMP_NAME"));
+        System.out.println("Employee Age : " + result.getFirst().get("EMP_AGE"));
+        System.out.println("Employee Department : " + result.getFirst().get("EMP_DEPT"));
 
-            // Get the metadata of the ResultSet to retrieve column names
-            int columnCount = resultSet.getMetaData().getColumnCount();
+        System.out.println("Employee Id : " + result.get(1).get("EMP_ID"));
+        System.out.println("Employee Name : " + result.get(1).get("EMP_NAME"));
+        System.out.println("Employee Age : " + result.get(1).get("EMP_AGE"));
+        System.out.println("Employee Department : " + result.get(1).get("EMP_DEPT"));
 
-            List<String> columnNames = new ArrayList<>();
-            for (int i = 1; i <= columnCount; i++) {
-                columnNames.add(resultSet.getMetaData().getColumnName(i));
-            }
-
-            // Iterate over the ResultSet and populate the list
-            while (resultSet.next()) {
-                Map<String, Object> rowMap = new HashMap<>();
-                for (String columnName : columnNames) {
-                    rowMap.put(columnName, resultSet.getObject(columnName));
-                }
-                resultList.add(rowMap);
-            }
-
-            // getFirst() method can be used to get the first element from a list
-            System.out.println("First Row : " + resultList.getFirst());
-            System.out.println("First Emp Name : " + resultList.getFirst().get("EmpName"));
-            System.out.println("First Emp Id : " + resultList.getFirst().get("EmpId"));
-
-            // Following code will print the result of the result set one by one.
-            while (resultSet.next()) {
-                System.out.println(resultSet.getString("EmpName"));
-                System.out.println(resultSet.getString("EmpId"));
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "SQL Exception occurred", e);
-        }
+        System.out.println("First HM of First List : " + result.getFirst());
     }
 }
