@@ -11,6 +11,10 @@ import static org.example.TestData.*;
 
 public class PropertiesFileSetup {
 
+    /**
+     * Set properties file using FileInputStream
+     * @return Properties object
+     */
     public Properties setProperties() {
 
         final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
