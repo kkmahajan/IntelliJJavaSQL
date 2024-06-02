@@ -11,6 +11,12 @@ import java.util.logging.Logger;
 import static org.example.TestData.*;
 
 public class DatabaseConnection {
+
+    /**
+     * Following method is creating a connection to the database.
+     *
+     * @param args as String[]
+     */
     public static void main(String[] args) {
 
         final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
@@ -21,8 +27,8 @@ public class DatabaseConnection {
         try {
             fileInputStream = new FileInputStream(PROP_FILE_PATH);
             prop.load(fileInputStream);
-        } catch (FileNotFoundException fnfe) {
-            LOGGER.log(Level.SEVERE, "Properties file not found on the given location", fnfe);
+        } catch (FileNotFoundException fife) {
+            LOGGER.log(Level.SEVERE, "Properties file not found on the given location", fife);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,12 +64,10 @@ public class DatabaseConnection {
             System.out.println("First Emp Id : " + resultList.getFirst().get("EmpId"));
 
             // Following code will print the result of the result set one by one.
-            /*
             while (resultSet.next()) {
                 System.out.println(resultSet.getString("EmpName"));
                 System.out.println(resultSet.getString("EmpId"));
             }
-            */
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "SQL Exception occurred", e);
         }
