@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import org.testng.annotations.DataProvider;
@@ -102,7 +104,7 @@ public class RestAssuredTestOne {
         requestBodyAddPlace.put("accuracy", 50);
         requestBodyAddPlace.put("name", placeNumber + ", Frontline House");
         requestBodyAddPlace.put("phone_number", "(+91)0987654321");
-        requestBodyAddPlace.put("address", random.nextInt(100) + ", side layout, cohen 09");
+        requestBodyAddPlace.put("address", 1 + random.nextInt(100) + ", side layout, cohen 09");
         requestBodyAddPlace.put("website", "http://google.com");
         requestBodyAddPlace.put("language", "English-EN");
 
@@ -297,5 +299,7 @@ public class RestAssuredTestOne {
     @Test
     public void testEnvVariables() {
         System.out.println(System.getenv());
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println(gson.toJson(System.getenv()));
     }
 }
