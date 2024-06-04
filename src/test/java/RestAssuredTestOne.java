@@ -45,7 +45,20 @@ public class RestAssuredTestOne {
         System.out.println("Place Id : " + place_id);
 
         // Update Place
-        given().log().all().queryParam("key", "qaclick123").header("Content-Type", "application/json").body(createRequestBodyForUpdatePlace()).when().put("update/json").then().assertThat().log().all().statusCode(200).body("msg", equalTo("Address successfully updated"));
+        given()
+                .log()
+                .all()
+                .queryParam("key", "qaclick123")
+                .header("Content-Type", "application/json")
+                .body(createRequestBodyForUpdatePlace())
+                .when()
+                .put("update/json")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(200)
+                .body("msg", equalTo("Address successfully updated"));
 
 
         // Get Place
