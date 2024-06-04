@@ -25,7 +25,20 @@ public class RestAssuredTestOne {
     @Test
     public void TestOne() {
         RestAssured.baseURI = "https://rahulshettyacademy.com/maps/api/place/";
-        String addResponse = given().log().all().queryParam("key", key).header("Content-Type", "application/json").body(createRequestBodyForAddPlace()).when().post("add/json").then().assertThat().statusCode(200).body("scope", equalTo("APP")).extract().response().asString();
+        String addResponse = given()
+                .log()
+                .all()
+                .queryParam("key", key)
+                .header("Content-Type", "application/json")
+                .body(createRequestBodyForAddPlace())
+                .when()
+                .post("add/json")
+                .then().assertThat()
+                .statusCode(200)
+                .body("scope", equalTo("APP"))
+                .extract()
+                .response()
+                .asString();
 
         JsonPath jsonPath = new JsonPath(addResponse);
         place_id = jsonPath.getString("place_id");
@@ -36,15 +49,25 @@ public class RestAssuredTestOne {
 
 
         // Get Place
-        String getPlaceResponse = given().log().all().queryParam("key", key).queryParam("place_id", place_id).when().get("get/json").then().assertThat().log().all().statusCode(200).extract().response().asString();
+        String getPlaceResponse = given()
+                .log()
+                .all()
+                .queryParam("key", key)
+                .queryParam("place_id", place_id)
+                .when()
+                .get("get/json")
+                .then()
+                .assertThat()
+                .log()
+                .all()
+                .statusCode(200)
+                .extract()
+                .response()
+                .asString();
 
         JsonPath jsonPath1 = new JsonPath(getPlaceResponse);
         String actualAddress = jsonPath1.getString("address");
         System.out.println("The Actual Address in Get Place after Update Place Response is : " + actualAddress);
-
-//        ExtentTestManager.getExtentTest().log(Status.INFO, "Additional information...");
-//        ExtentTestManager.getExtentTest().pass("Test passed!");
-//        ExtentManager.flush(); // Flush ExtentReports
     }
 
     public Object createRequestBodyForAddPlace() {
