@@ -63,5 +63,12 @@ public class ConstructorExample {
         System.out.println("S8 Student Marks : " + s8.getMarks());
         System.out.println("S8 Student Activity : " + s8.isActive());
         System.out.println();
+
+        Student s9 = new Student("Harry", true);
+        System.out.println("S9 Student Roll No : " + s9.getRollno());
+        System.out.println("S9 Student Name : " + s9.getName());
+        System.out.println("S9 Student Marks : " + s9.getMarks());
+        System.out.println("S9 Student Activity : " + s9.isActive());
+        System.out.println();
     }
 }
