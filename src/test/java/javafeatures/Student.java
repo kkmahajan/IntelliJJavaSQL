@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Student {
-    int rollno;
-    String name;
-    double marks;
-    boolean active;
+    public int rollno;
+    private String name;
+    private double marks;
+    public boolean active;
 
     Student()
     {
