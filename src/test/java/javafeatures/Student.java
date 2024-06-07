@@ -7,65 +7,56 @@ import lombok.Setter;
 @Setter
 public class Student {
     public int rollno;
+    public boolean active;
     private String name;
     private double marks;
-    public boolean active;
 
-    Student()
-    {
+    Student() {
         System.out.println("Constructor called without arguments");
     }
 
-    Student(int rollno, String name)
-    {
+    Student(int rollno, String name) {
         this.rollno = rollno;
         this.name = name;
         System.out.println("Constructor Called with rollno and name");
     }
 
-    Student(int rollno)
-    {
+    Student(int rollno) {
         this.rollno = rollno;
         System.out.println("Constructor Called with rollno only");
     }
 
-    Student(String name)
-    {
+    Student(String name) {
         this.name = name;
         System.out.println("Constructor Called with name only");
 
     }
 
-    Student(int rollno, String name, double marks)
-    {
+    Student(int rollno, String name, double marks) {
         this.rollno = rollno;
         this.name = name;
         this.marks = marks;
         System.out.println("Constructor Called with rollno, name and marks");
     }
 
-    Student(String name, double marks)
-    {
+    Student(String name, double marks) {
         this.name = name;
         this.marks = marks;
         System.out.println("Constructor Called with name and marks");
     }
 
-    Student(double marks)
-    {
+    Student(double marks) {
         this.marks = marks;
         System.out.println("Constructor Called with marks only");
     }
-    
-    Student(String name, boolean active)
-    {
+
+    Student(String name, boolean active) {
         this.name = name;
         this.active = active;
         System.out.println("Constructor Called with name and active");
     }
-    
-    Student(boolean active)
-    {
+
+    Student(boolean active) {
         this.active = active;
         System.out.println("Constructor Called with active only");
     }
