@@ -14,7 +14,7 @@ public class DatabaseConnection {
     static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
     static DatabaseUtils dbUtils = new DatabaseUtils();
 
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
 
         Properties prop = propertiesFileSetup.setProperties();
         List<Map<String, Object>> result = dbUtils.executeQuery(prop, EMP_SEL);
