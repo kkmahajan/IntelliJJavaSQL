@@ -34,7 +34,7 @@ public class ProblemCodes {
     @Test
     public void checkFibonacciNumber() {
 
-        int n = 2;
+        int n = 20000;
         if (isFibonacci(n)) {
             System.out.println("Given number is fibonacci");
         } else {

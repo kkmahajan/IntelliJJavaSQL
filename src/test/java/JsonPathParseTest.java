@@ -5,6 +5,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.example.TestData.COURSE_JSON_FILE_PATH;
 
@@ -13,14 +15,13 @@ public class JsonPathParseTest {
     // As API is not yet available, mocked response can be used to complete automation for such APIs
     JsonPath jsonPath = new JsonPath(Payload.coursePrice());
 
-    public JsonPathParseTest() throws IOException {
-    }
-
     // Print no of courses returned by API
     @Test
     public void printNoOfCourses() {
-        // .size() can be applied only to array []
+        // .size() can be applied only to List & Json Arrays
         System.out.println("No of Courses in the Response : " + jsonPath.getInt("courses.size()"));
+        System.out.println(jsonPath.getString("dashboard"));
+        System.out.println(jsonPath.getInt("dashboard.size()"));
     }
 
     @Test
@@ -80,6 +81,21 @@ public class JsonPathParseTest {
             ioe.getCause();
             ioe.getStackTrace();
             ioe.printStackTrace();
+        }
+    }
+
+    @Test
+    public void ttest() {
+        System.out.println("Pretty Print : \n" + jsonPath.prettyPrint());
+        System.out.println("Courses String Only : \n" + jsonPath.getString("courses"));
+        System.out.println("Courses List : \n" + jsonPath.getList("courses"));
+        List<Object> courses = jsonPath.getList("courses");
+        List<HashMap<String, Object>> coursesHm = jsonPath.getList("courses");
+        System.out.println("List<Object> Courses : \n" + courses);
+        System.out.println("List<HashMap<String, Object>> Courses : \n" + coursesHm);
+        System.out.println("Title of First Course : \n" + coursesHm.getFirst().get("title"));
+        for (HashMap<String, Object> stringObjectHashMap : coursesHm) {
+            System.out.println("Title of Course : \n" + stringObjectHashMap.get("title"));
         }
     }
 }
