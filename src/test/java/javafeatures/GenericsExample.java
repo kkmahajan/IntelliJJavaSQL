@@ -5,6 +5,8 @@ import java.util.ArrayList;
 public class GenericsExample {
     public static void main(String[] args) {
         Generics<String> generics = new Generics<>("Hello");
+        System.out.println(generics.getValue());
+        generics.setValue("World");
 
         System.out.println(generics.getValue());
         System.out.println(generics.getValue().getClass().getName());
