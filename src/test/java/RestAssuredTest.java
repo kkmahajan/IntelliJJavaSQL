@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class RestAssuredTestOne {
+public class RestAssuredTest {
 
     String key = "qaclick123";
     String place_id = null;

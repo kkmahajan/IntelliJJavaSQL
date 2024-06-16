@@ -1,4 +1,4 @@
-package javafeatures;
+package org.example;
 
 import java.util.ArrayList;
 

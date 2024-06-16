@@ -1,7 +1,12 @@
 import org.testng.annotations.Test;
 
-public class ProblemCodes {
+public class ProblemCodesTest {
 
+    /**
+     * This method checks if a number is fibonacci or not using Java
+     * @param n as int
+     * @return boolean
+     */
     public static boolean isFibonacci(int n) {
         if (n < 0) {
             return false; // Negative numbers are not in the Fibonacci series
@@ -13,6 +18,11 @@ public class ProblemCodes {
         return (root1 * root1 == 5 * n * n + 4) || (root2 * root2 == 5 * n * n - 4);
     }
 
+    /**
+     * This method checks if a number is fibonacci or not using Java
+     * @param n as int
+     * @return boolean
+     */
     public static boolean isFibonacciJava(int n) {
         if (n < 0) {
             return false; // Negative numbers are not in the Fibonacci series
@@ -31,6 +41,9 @@ public class ProblemCodes {
         return false;
     }
 
+    /**
+     * This method checks if a number is fibonacci or not and uses other methods to prove it
+     */
     @Test
     public void checkFibonacciNumber() {
 
@@ -69,5 +82,28 @@ public class ProblemCodes {
         int num3 = 16 * 16;
         int sqrt3 = (int) Math.sqrt(num3);
         System.out.println(sqrt3);
+    }
+
+    /**
+     * This test method demonstrates the usage of the Math.pow() method.
+     * It calculates the power of 2 and 3 and prints the results.
+     */
+    @Test
+    public void testPower() {
+        System.out.println(Math.pow(2,3));
+    }
+
+    // Write a method to check and print the repeating characters with the number of occurrences in a string using Java
+    @Test
+    public void testRepeatingCharacters() {
+        String str = "Kaustubh";
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            for (int j = i + 1; j < chars.length; j++) {
+                if (chars[i] == chars[j]) {
+                    System.out.println(chars[i]);
+                }
+            }
+        }
     }
 }

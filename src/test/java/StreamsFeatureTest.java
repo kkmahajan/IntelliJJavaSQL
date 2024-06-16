@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class StreamsFeature {
+public class StreamsFeatureTest {
 
     /**
      * Tests various methods of printing and manipulating a list of integers using Streams.
