@@ -12,7 +12,7 @@ public class LeftRight implements Left, Right{
     public void m1() {
         System.out.println("Class's own implementation"); // Line 1
         Right.super.m1(); // Line 2
-        Left.super.m1(); // Line 3
+//        Left.super.m1(); // Line 3
     }
 
     public static void main(String[] args) {
