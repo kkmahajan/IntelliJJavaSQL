@@ -1,7 +1,11 @@
 package javafeatures;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.testng.annotations.Test;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashSet;
 
 public class RandomFeaturesTest {
@@ -177,6 +181,101 @@ public class RandomFeaturesTest {
         StringBuffer[] a = new StringBuffer[]{new StringBuffer("Kaustubh"), new StringBuffer("Mahajan")};
         System.out.println(a[0]);
         System.out.println(a[1]);
+    }
 
+    /**
+     * This is an example of a <CheckedException> where the program throws an exception
+     * and java has already told us to deal it before compiling the code.
+     * The exceptions which are found or checked at the compile time are known as <CheckedException>
+     */
+    @Test
+    public void testExceptionHandling(){
+        try{
+            System.out.println("\nIn try block before exception");
+//            System.out.println("\n"+10/0);
+            System.out.println(10/2);
+            System.out.println("In try block after exception");
+        }
+        catch(ArithmeticException e){
+            System.out.println("\nArithmeticException Object");
+            System.out.println("\n"+e);
+            System.out.println("\nStackTrace");
+            e.printStackTrace();
+            System.out.println("\nGet Cause");
+            e.getCause();
+            System.out.println("\nIn catch block");
+        }finally {
+            System.out.println("\nIn finally block");
+        }
+    }
+
+    @Test
+    public void testEmptyCatch(){
+        try {
+            System.out.println(10 / 0);
+        } catch (ArithmeticException e) {
+            //Empty catch block
+        }
+        finally {
+            System.out.println("In finally block");
+        }
+    }
+
+    /**
+     * This is an example of an <UncheckedException>
+     * Here java will not know that the exception will occur or not.
+     * The exceptions which are thrown at run time are known as <UncheckedException>
+     */
+    @Test
+    public void uncheckedExceptionTest(){
+        String s = null;
+        // We will surely get a FileNotFoundException as there is not file specified
+        // But we will also get a NullPointerException which will occur due to null String passed to the FileReader
+        // Hence we will get an UncheckedException
+        try {
+            FileReader fileReader = new FileReader(s);
+            fileReader.read();
+        }
+        catch (NullPointerException | IOException ioe) {
+            System.out.println("Null Pointer Exception caused which was caught");
+        }
+        finally {
+            String str = "Hello";
+            // We will surely get a FileNotFoundException as there is not file specified
+            // But we will not get a NullPointerException here as we are not passing null to the FileReader
+            // Hence we will get a CheckedException
+            try {
+                System.out.println("Inside try block of finally block");
+                FileReader fileReader = new FileReader(str);
+                String readFile = String.valueOf(fileReader.read());
+                System.out.println(readFile);
+                fileReader.close();
+            }
+            catch (IOException e) {
+                System.out.println("Caught Exception in catch block of finally block");
+            }finally {
+                System.out.println("inside finally block of finally block");
+            }
+        }
+    }
+
+    @Test
+    public void testIndexOutOfBoundException(){
+        String s = "Hello";
+        try {
+            System.out.println(s.charAt(10));
+        } catch (StringIndexOutOfBoundsException e) {
+            System.out.println("Caught StringIndexOutOfBoundsException");
+        }finally {
+            System.out.println("Always verify the length of the string variables");
+        }
+        int[] a = {1, 2, 3};
+        try {
+            System.out.println(a[10]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Caught ArrayIndexOutOfBoundsException");
+        }finally {
+            System.out.println("Always verify the length of the array variables");
+        }
     }
 }
