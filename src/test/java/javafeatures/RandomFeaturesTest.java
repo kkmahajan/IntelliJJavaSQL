@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.*;
 
 public class RandomFeaturesTest {
 
@@ -275,7 +275,24 @@ public class RandomFeaturesTest {
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("Caught ArrayIndexOutOfBoundsException");
         }finally {
+            assert System.out != null;
             System.out.println("Always verify the length of the array variables");
         }
+    }
+
+    @Test
+    public void getPropertiesFileInHashMap(){
+        Properties properties = new Properties();
+        TreeMap<String, String> propertiesMap = new TreeMap<>();
+        try {
+            properties.load(new FileReader("src/test/resources/config.properties"));
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                propertiesMap.put((String) entry.getKey(), (String) entry.getValue());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(propertiesMap);
+        System.out.println(propertiesMap.get("prop3"));
     }
 }
