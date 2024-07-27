@@ -295,4 +295,11 @@ public class RandomFeaturesTest {
         System.out.println(propertiesMap);
         System.out.println(propertiesMap.get("prop3"));
     }
+
+    @Test
+    public void testInt(){
+        int x = 10;
+        int y = (x > 5) ? (x < 20 ? 1 : 0) : -1;
+        System.out.println(y);
+    }
 }

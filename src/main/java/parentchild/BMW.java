@@ -12,6 +12,6 @@ public class BMW extends Car {
     }
 
     public void displayCarPriceInDollars() {
-        System.out.println("Price of the car is: " + getCarPrice() + " dollars");
+        System.out.println("BMW Method : Price of the car is: " + getCarPrice() + " dollars");
     }
 }
