@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static org.example.TestData.PROP_FILE_PATH;
+
 public class RandomFeaturesTest {
 
     @Test
@@ -285,7 +287,7 @@ public class RandomFeaturesTest {
         Properties properties = new Properties();
         TreeMap<String, String> propertiesMap = new TreeMap<>();
         try {
-            properties.load(new FileReader("src/test/resources/config.properties"));
+            properties.load(new FileReader(PROP_FILE_PATH));
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                 propertiesMap.put((String) entry.getKey(), (String) entry.getValue());
             }
@@ -298,7 +300,7 @@ public class RandomFeaturesTest {
 
     @Test
     public void testInt(){
-        int x = 10;
+        int x = 100;
         int y = (x > 5) ? (x < 20 ? 1 : 0) : -1;
         System.out.println(y);
     }
