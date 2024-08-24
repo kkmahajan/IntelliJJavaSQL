@@ -9,6 +9,8 @@ import static org.example.TestData.*;
 
 public class DatabaseUtils {
 
+    static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
+    static Properties prop = propertiesFileSetup.setProperties();
     final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
     String dbUser = System.getenv(SQL_DB_USERNAME);
     String dbKey = System.getenv(SQL_DB_KEY);
@@ -17,7 +19,7 @@ public class DatabaseUtils {
     Statement statement;
     ResultSet resultSet;
 
-    public List<Map<String, Object>> executeQuery(Properties prop, String query) {
+    public List<Map<String, Object>> executeQuery(String query) {
 
         DriverManager.setLoginTimeout(10);
         List<Map<String, Object>> resultList = null;
@@ -45,6 +47,7 @@ public class DatabaseUtils {
                 }
                 resultList.add(rowMap);
             }
+            con.close();
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "SQL Exception occurred", e);
         }
