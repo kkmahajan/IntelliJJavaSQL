@@ -11,7 +11,7 @@ public class DatabaseUtils {
 
     static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
     static Properties prop = propertiesFileSetup.setProperties();
-    final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
+    final Logger LOGGER = Logger.getLogger(DatabaseUtils.class.getName());
     String dbUser = System.getenv(SQL_DB_USERNAME);
     String dbKey = System.getenv(SQL_DB_KEY);
     String connectionUrl = null;
@@ -21,12 +21,14 @@ public class DatabaseUtils {
 
     /**
      * This method is used to execute query and provide the result in List<Map<String, Object>>
+     *
      * @param query as String
      * @return Query Result List<Map<String, Object>>
      */
     public List<Map<String, Object>> executeQuery(String query) {
 
         DriverManager.setLoginTimeout(10);
+        System.out.println("Used Query : " + query);
         List<Map<String, Object>> resultList = null;
         try {
             connectionUrl = prop.getProperty(sqlDbUrl);
@@ -62,11 +64,12 @@ public class DatabaseUtils {
     /**
      * This method takes input a query and replaces the placeholders in the query with the actual values passed
      * as parameters in the Map<String, String>
-     * @param query as String
+     *
+     * @param query    as String
      * @param paramMap as Map<String, String>
      * @return Query Result as List<Map<String, Object>>
      */
-    public List<Map<String, Object>> getDBData(String query, Map<String, String> paramMap) {
+    public List<Map<String, Object>> getDBDataWithParams(String query, Map<String, String> paramMap) {
 
         for (Map.Entry<String, String> entry : paramMap.entrySet()) {
             query = query.replace(("&" + entry.getKey()), entry.getValue());

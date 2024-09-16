@@ -1,5 +1,7 @@
 package org.example;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class DatabaseConnection {
         paramMap.put("empDept", "UI");
         paramMap.put("empAge", "24");
 
-        List<Map<String, Object>> result2 = dbUtils.getDBData(EMP_SEL_NAME, paramMap);
+        List<Map<String, Object>> result2 = dbUtils.getDBDataWithParams(EMP_SEL_NAME, paramMap);
 
         System.out.println("***: GSON :***\n" + Utils.listOfMapToJsonStringUsingGson(result2));
         System.out.println(Utils.listOfMapToPrettyJsonStringUsingGson(result2));

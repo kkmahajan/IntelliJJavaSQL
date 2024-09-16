@@ -17,7 +17,7 @@ public class PropertiesFileSetup {
      */
     public Properties setProperties() {
 
-        final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
+        final Logger LOGGER = Logger.getLogger(PropertiesFileSetup.class.getName());
         Properties prop = new Properties();
         FileInputStream fileInputStream;
 
