@@ -40,7 +40,6 @@ public class DatabaseUtils {
 
             // Get the metadata of the ResultSet to retrieve column names
             int columnCount = resultSet.getMetaData().getColumnCount();
-
             List<String> columnNames = new ArrayList<>();
             for (int i = 1; i <= columnCount; i++) {
                 columnNames.add(resultSet.getMetaData().getColumnName(i));

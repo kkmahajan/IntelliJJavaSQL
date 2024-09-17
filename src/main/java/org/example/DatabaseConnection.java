@@ -1,6 +1,6 @@
 package org.example;
 
-import org.json.JSONObject;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ public class DatabaseConnection {
         executeDbDataMethod();
     }
 
-    public static void executeDbDataMethod(){
+    public static void executeDbDataMethod() {
 
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("empName", "John");
