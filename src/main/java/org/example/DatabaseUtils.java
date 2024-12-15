@@ -75,6 +75,4 @@ public class DatabaseUtils {
         }
         return executeQuery(query);
     }
-
-
 }

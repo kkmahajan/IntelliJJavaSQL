@@ -11,19 +11,18 @@ public class ReverseString {
 
     // Method to reverse the string
     public static String reverseString(String str) {
-        String reversed = "";  // Initialize an empty string to store the reversed string
+        StringBuilder reversed = new StringBuilder();  // Initialize an empty string to store the reversed string
 
         // Loop through the original string in reverse order
         for (int i = str.length() - 1; i >= 0; i--) {
-            reversed += str.charAt(i);  // Append each character to the reversed string
+            reversed.append(str.charAt(i));  // Append each character to the reversed string
         }
-
-        return reversed;  // Return the reversed string
+        return reversed.toString();  // Return the reversed string
     }
 
     @Test
-    public void testString(){
-        int a = 6;
+    public void testString() {
+        int a = -100;
         System.out.println(" ~a = " + ~a);
     }
 }

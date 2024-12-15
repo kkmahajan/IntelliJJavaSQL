@@ -304,4 +304,21 @@ public class RandomFeaturesTest {
         int y = (x > 5) ? (x < 20 ? 1 : 0) : -1;
         System.out.println(y);
     }
+
+    @Test
+    public void testIntLarge(){
+        int x = 100;
+        int y= 1000;
+        int large = (x > y) ? x : y;
+        System.out.println(large);
+    }
+
+    @Test
+    public void testIntLargeMathMax(){
+        int x = 100;
+        int y= 1000;
+        int large = Math.max(x, y);
+        System.out.println(large);
+    }
+
 }
