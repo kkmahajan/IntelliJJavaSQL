@@ -2,10 +2,8 @@ package javafeatures;
 
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ArrayListSortTest {
 
@@ -33,4 +31,50 @@ public class ArrayListSortTest {
         System.out.println("Stream : " + newSet);
     }
 
+    @Test
+    public void testArray2() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4);
+        List<Integer> squaredNumbers = numbers.stream()
+                .map(n -> n * n)
+                .collect(Collectors.toList());
+        System.out.println(squaredNumbers); // [1, 4, 9, 16]
+    }
+
+    @Test
+    public void testArray3() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        int sum = numbers.stream()
+                .reduce(0, (a, b) -> a + b);
+        System.out.println(sum); // 15
+    }
+
+    @Test
+    public void testArray4() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        int sum = numbers.stream()
+                .reduce(0, Integer::sum);
+        System.out.println(sum); // 15
+    }
+
+    @Test
+    public void testJoin() {
+        List<String> names = Arrays.asList("John", "Jane", "Jack");
+        String result = names.stream()
+                .collect(Collectors.joining(", "));
+        System.out.println(result); // "John, Jane, Jack"
+    }
+
+    @Test
+    public void testJoin2() {
+        List<String> names = Arrays.asList("John", "Jane", "Jack");
+        String result = String.join(", ", names);
+        System.out.println(result); // "John, Jane, Jack"
+    }
+
+    @Test
+    public void testJoin3() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        numbers.parallelStream()
+                .forEach(n -> System.out.println(n + " " + Thread.currentThread().getName()));
+    }
 }
