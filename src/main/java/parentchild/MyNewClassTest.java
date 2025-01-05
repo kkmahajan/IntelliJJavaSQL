@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 public class MyNewClassTest {
 
     Car car = new BMW("BMW", 100000);
-//    BMW bmw = (BMW) new Car("BMW", 100000); WRONG IMPLEMENTATION
+//    BMW bmw = (BMW) new Car("BMW", 100000); //WRONG IMPLEMENTATION
     Car audi = new Car("Audi", 102000);
     BMW bmw = new BMW("BMW1", 120000);
 
