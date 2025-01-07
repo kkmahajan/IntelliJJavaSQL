@@ -1,3 +1,5 @@
+package testdums;
+
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -8,7 +10,7 @@ import java.util.stream.Stream;
 public class StreamsFeatureTest {
 
     /**
-     * Tests various methods of printing and manipulating a list of integers using Streams.
+     * pubmatic.Tests various methods of printing and manipulating a list of integers using Streams.
      */
     @Test
     public void testStreams() {

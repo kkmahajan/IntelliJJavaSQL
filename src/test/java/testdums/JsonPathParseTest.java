@@ -1,6 +1,9 @@
+package testdums;
+
 import io.restassured.path.json.JsonPath;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import testpackage.Payload;
 
 import java.io.IOException;
 import java.nio.file.Files;
