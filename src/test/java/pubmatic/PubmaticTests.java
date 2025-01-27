@@ -2,7 +2,7 @@ package pubmatic;
 
 import org.testng.annotations.Test;
 
-public class Tests {
+public class PubmaticTests {
     /**
      * Given a string, reverse the string in a way that special characters are not affected.
      * <p>
