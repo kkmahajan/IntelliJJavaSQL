@@ -40,7 +40,7 @@ public class ArrayListSortTest {
 
     @Test
     public void testArray3() {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
         int sum = numbers.stream().reduce(0, (a, b) -> a + b);
         System.out.println(sum); // 15
     }

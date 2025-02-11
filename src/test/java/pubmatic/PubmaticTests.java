@@ -54,4 +54,19 @@ public class PubmaticTests {
             }
         }
     }
+
+    @Test
+    public void findSubArraysWhereSumIsMatchingCorrected() {
+        int[] a = {3, 4, -7, 1, 3, 3, 1, -4};
+        int targetSum = 7;
+        for (int i = 0; i < a.length; i++) {
+            int sum = 0;
+            for (int j = i; j < a.length; j++) {
+                sum += a[j];
+                if (sum == targetSum) {
+                    System.out.println("Sum found between indexes " + i + " and " + j);
+                }
+            }
+        }
+    }
 }

@@ -31,6 +31,6 @@ public class VowelCount {
                 System.out.print(ch + " ");
             }
         }
-        System.out.println("\nTotal Vowels in String :"+count);
+        System.out.println("\nTotal Vowels in String :" + count);
     }
 }

@@ -30,7 +30,6 @@ public class FindIndicesWhichMatchTheSumTest {
             // Calculate the sum of subarray starting from 'start' index
             for (int end = start; end < arr.length; end++) {
                 sum += arr[end];
-
                 // If sum matches the target, add indices to the result
                 if (sum == targetSum) {
                     result.add("Sum found between indexes " + start + " and " + end);

@@ -1,25 +1,23 @@
 package samplecode;
 
-import java.util.Iterator;
-
 public class StringProgram {
-	public static void main(String[] args) {
-		String str = "aabbba";
-		
-		int count = 1;
-		for (int i=0;i<str.length();i=i+count) {
-			count = 1;
-			for(int j = i+1;j<str.length();j++) {
-				if(str.charAt(i)==str.charAt(j)) {
-					count = count+1;
-				}else {
-					break;
-				}
-			}
-			System.out.print(str.charAt(i)+ ""+ count);
-		}
-	}
-	
+    public static void main(String[] args) {
+        String str = "aabbba";
+
+        int count = 1;
+        for (int i = 0; i < str.length(); i = i + count) {
+            count = 1;
+            for (int j = i + 1; j < str.length(); j++) {
+                if (str.charAt(i) == str.charAt(j)) {
+                    count = count + 1;
+                } else {
+                    break;
+                }
+            }
+            System.out.print(str.charAt(i) + "" + count);
+        }
+    }
+
 //	String method(String input) {
 //		int count = 1;
 //		String result = "";
@@ -35,7 +33,7 @@ public class StringProgram {
 //		}
 //		return result;
 //	}
-	
+
 //	int x=1;
 //	static int y=2;
 //	  public static void main(String[] args) {

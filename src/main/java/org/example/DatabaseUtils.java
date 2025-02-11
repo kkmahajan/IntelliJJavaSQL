@@ -21,14 +21,17 @@ public class DatabaseUtils {
 
     /**
      * This method is used to execute query and provide the result in List<Map<String, Object>>
+     * Where List specifies the number of rows fetched in the ResultSet
+     * Map<String> specifies the columns fetched in the ResultSet</String>
+     * Map<Object> specifies the values fetched in the ResultSet</Object>
      *
      * @param query as String
-     * @return Query Result List<Map<String, Object>>
+     * @return Query Result Set in List<Map<String, Object>>
      */
     public List<Map<String, Object>> executeQuery(String query) {
 
         DriverManager.setLoginTimeout(10);
-        System.out.println("Used Query : " + query);
+        System.out.println("Used Query : \n" + query);
         List<Map<String, Object>> resultList = null;
         try {
             connectionUrl = prop.getProperty(sqlDbUrl);

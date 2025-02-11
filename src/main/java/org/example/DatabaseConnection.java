@@ -18,7 +18,7 @@ public class DatabaseConnection {
         System.out.println(Utils.listOfMapToPrettyJsonStringUsingJackson(result));
         System.out.println("***: GSON :***\n" + Utils.listOfMapToJsonStringUsingGson(result));
         System.out.println(Utils.listOfMapToPrettyJsonStringUsingGson(result));
-        executeDbDataMethod();
+
     }
 
     public static void executeDbDataMethod() {
@@ -29,9 +29,13 @@ public class DatabaseConnection {
         paramMap.put("empDept", "UI");
         paramMap.put("empAge", "24");
 
-        System.out.println("Original Query with placeholders : " + EMP_SEL_NAME);
+        System.out.println("\nOriginal Query with placeholders : \n" + EMP_SEL_NAME);
         List<Map<String, Object>> result2 = dbUtils.getDBDataWithParams(EMP_SEL_NAME, paramMap);
-        System.out.println("***: GSON :***\n" + Utils.listOfMapToJsonStringUsingGson(result2));
+        System.out.println("\n***: GSON :***\n" + Utils.listOfMapToJsonStringUsingGson(result2));
         System.out.println(Utils.listOfMapToPrettyJsonStringUsingGson(result2));
+    }
+
+    public void executeDbDataMethodTest() {
+        executeDbDataMethod();
     }
 }

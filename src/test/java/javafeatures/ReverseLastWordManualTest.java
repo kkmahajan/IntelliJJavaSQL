@@ -55,19 +55,19 @@ public class ReverseLastWordManualTest {
     }
 
     @Test
-    public void testString(){
+    public void testString() {
         String input = "today is thursday";
         String[] wordsInString = input.split(" ");
         System.out.println(Arrays.toString(wordsInString));
         System.out.println(wordsInString[0]);
-        System.out.println(wordsInString[wordsInString.length-1].toString().toUpperCase());
+        System.out.println(wordsInString[wordsInString.length - 1].toUpperCase());
 
-        String reversedLastWord = new StringBuilder(wordsInString[wordsInString.length-1]).reverse().toString();
+        String reversedLastWord = new StringBuilder(wordsInString[wordsInString.length - 1]).reverse().toString();
         System.out.println(reversedLastWord.toUpperCase());
     }
 
     @Test
-    public void testStringReverseEveryWordOnSamePosition(){
+    public void testStringReverseEveryWordOnSamePosition() {
         String input = "today is my day";
         String[] wordsInString = input.split(" ");
         StringBuilder reversedString = new StringBuilder();
@@ -79,14 +79,14 @@ public class ReverseLastWordManualTest {
     }
 
     @Test
-    public void testStringReverseEntireStatement(){
+    public void testStringReverseEntireStatement() {
         String input = "today is my day";
         String reversedString = new StringBuilder(input).reverse().toString();
         System.out.println(reversedString);
     }
 
     @Test
-    public void testStringReverseWordsInSentence(){
+    public void testStringReverseWordsInSentence() {
         String input = "today is my day";
         String[] wordsInString = input.split(" ");
         StringBuilder reversedString = new StringBuilder();
