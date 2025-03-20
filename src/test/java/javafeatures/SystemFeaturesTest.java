@@ -31,9 +31,16 @@ public class SystemFeaturesTest {
         for (int j : a) {
             sum = sum + j;
         }
-        
+
         System.out.println("Sum of Array Items : " + sum);
         System.out.println("No. of Array Items : " + a.length);
         System.out.println("Average of Array Items : " + sum / a.length);
+    }
+
+    @Test
+    public void testInt() {
+        Integer s = 128;
+        Integer r = 128;
+        System.out.println(s == r);
     }
 }
