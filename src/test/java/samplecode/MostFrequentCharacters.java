@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class MostFrequentCharacters {
             // Increment count if character exists; otherwise, set to 1
             charCountMap.put(c, charCountMap.getOrDefault(c, 0) + 1);
         }
-        System.out.println("Map : "+charCountMap);
+        System.out.println("Map : " + charCountMap);
 
         // Find the maximum frequency
         int maxFrequency = 0;

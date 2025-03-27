@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 import lombok.Getter;
 import lombok.Setter;

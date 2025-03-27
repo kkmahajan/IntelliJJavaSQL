@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 import org.testng.annotations.Test;
 

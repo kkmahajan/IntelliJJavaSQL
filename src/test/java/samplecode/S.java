@@ -1,10 +1,9 @@
-package javafeatures;
+package samplecode;
 
 import java.util.HashMap;
 
 public class S {
     public static void main(String[] args) {
-        System.out.println("Hello, World!");
         String str1 = "google";
         String str2 = "gogoel";
         String str3 = "gogle";
@@ -19,12 +18,11 @@ public class S {
         }
 
         HashMap<Character, Integer> charCountMap = new HashMap<>();
-
         // Count frequency of each character in the first string
         for (char c : s1.toCharArray()) {
             charCountMap.put(c, charCountMap.getOrDefault(c, 0) + 1);
         }
-
+        System.out.println("Map after S1 : " + charCountMap);
         // Decrease frequency based on second string
         for (char c : s2.toCharArray()) {
             if (!charCountMap.containsKey(c) || charCountMap.get(c) == 0) {
@@ -32,7 +30,7 @@ public class S {
             }
             charCountMap.put(c, charCountMap.get(c) - 1);
         }
-
+        System.out.println("Map after S2 : " + charCountMap);
         return true;
     }
 }

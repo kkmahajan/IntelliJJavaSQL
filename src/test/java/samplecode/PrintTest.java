@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 import org.testng.annotations.Test;
 
@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class PrintTest {
 
     @Test
-    public void testPrintOnlyOnce(){
+    public void testPrintOnlyOnce() {
         int[] a = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         // Use Streams to remove duplicates and print unique integers

@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 public class PalindromeCheck {
 
@@ -8,6 +8,6 @@ public class PalindromeCheck {
     }
 
     public static boolean isPalindrome(String str) {
-        return str.equals(new StringBuilder(str).reverse().toString());
+        return str.contentEquals(new StringBuilder(str).reverse());
     }
 }

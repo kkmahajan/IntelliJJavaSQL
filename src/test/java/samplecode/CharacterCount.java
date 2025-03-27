@@ -1,4 +1,4 @@
-package javafeatures;
+package samplecode;
 
 import java.util.Scanner;
 

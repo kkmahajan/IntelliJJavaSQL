@@ -1,12 +1,13 @@
-package javafeatures;
+package samplecode;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.testng.annotations.Test;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 import static org.example.TestData.PROP_FILE_PATH;
 
@@ -156,14 +157,14 @@ public class RandomFeaturesTest {
     }
 
     @Test
-    public void testStringFormat(){
+    public void testStringFormat() {
         String str9 = String.format("Hi this is %s from %s of Java", "Kaustubh", "World");
         System.out.println(str9);
     }
 
     @Test
-    public void testStringArray(){
-        String a[] = {"Kaustubh", "Mahajan"};
+    public void testStringArray() {
+        String[] a = {"Kaustubh", "Mahajan"};
         System.out.println(a[0]);
         System.out.println(a[1]);
 
@@ -171,15 +172,15 @@ public class RandomFeaturesTest {
         System.out.println(ab[0]);
         System.out.println(ab[1]);
 
-        String[] abc = new String[] {"Kaustubh", "Mahajan"};
+        String[] abc = new String[]{"Kaustubh", "Mahajan"};
         System.out.println(abc[0]);
         System.out.println(abc[1]);
         System.out.println(ab == abc);
-        System.out.println(a==ab);
+        System.out.println(a == ab);
     }
 
     @Test
-    public void testStringBufferArray(){
+    public void testStringBufferArray() {
         StringBuffer[] a = new StringBuffer[]{new StringBuffer("Kaustubh"), new StringBuffer("Mahajan")};
         System.out.println(a[0]);
         System.out.println(a[1]);
@@ -191,34 +192,32 @@ public class RandomFeaturesTest {
      * The exceptions which are found or checked at the compile time are known as <CheckedException>
      */
     @Test
-    public void testExceptionHandling(){
-        try{
+    public void testExceptionHandling() {
+        try {
             System.out.println("\nIn try block before exception");
 //            System.out.println("\n"+10/0);
-            System.out.println(10/2);
+            System.out.println(10 / 2);
             System.out.println("In try block after exception");
-        }
-        catch(ArithmeticException e){
+        } catch (ArithmeticException e) {
             System.out.println("\nArithmeticException Object");
-            System.out.println("\n"+e);
+            System.out.println("\n" + e);
             System.out.println("\nStackTrace");
             e.printStackTrace();
             System.out.println("\nGet Cause");
             e.getCause();
             System.out.println("\nIn catch block");
-        }finally {
+        } finally {
             System.out.println("\nIn finally block");
         }
     }
 
     @Test
-    public void testEmptyCatch(){
+    public void testEmptyCatch() {
         try {
             System.out.println(10 / 0);
         } catch (ArithmeticException e) {
             //Empty catch block
-        }
-        finally {
+        } finally {
             System.out.println("In finally block");
         }
     }
@@ -229,7 +228,7 @@ public class RandomFeaturesTest {
      * The exceptions which are thrown at run time are known as <UncheckedException>
      */
     @Test
-    public void uncheckedExceptionTest(){
+    public void uncheckedExceptionTest() {
         String s = null;
         // We will surely get a FileNotFoundException as there is not file specified
         // But we will also get a NullPointerException which will occur due to null String passed to the FileReader
@@ -237,11 +236,9 @@ public class RandomFeaturesTest {
         try {
             FileReader fileReader = new FileReader(s);
             fileReader.read();
-        }
-        catch (NullPointerException | IOException ioe) {
+        } catch (NullPointerException | IOException ioe) {
             System.out.println("Null Pointer Exception caused which was caught");
-        }
-        finally {
+        } finally {
             String str = "Hello";
             // We will surely get a FileNotFoundException as there is not file specified
             // But we will not get a NullPointerException here as we are not passing null to the FileReader
@@ -252,23 +249,22 @@ public class RandomFeaturesTest {
                 String readFile = String.valueOf(fileReader.read());
                 System.out.println(readFile);
                 fileReader.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 System.out.println("Caught Exception in catch block of finally block");
-            }finally {
+            } finally {
                 System.out.println("inside finally block of finally block");
             }
         }
     }
 
     @Test
-    public void testIndexOutOfBoundException(){
+    public void testIndexOutOfBoundException() {
         String s = "Hello";
         try {
             System.out.println(s.charAt(10));
         } catch (StringIndexOutOfBoundsException e) {
             System.out.println("Caught StringIndexOutOfBoundsException");
-        }finally {
+        } finally {
             System.out.println("Always verify the length of the string variables");
         }
         int[] a = {1, 2, 3};
@@ -276,14 +272,14 @@ public class RandomFeaturesTest {
             System.out.println(a[10]);
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("Caught ArrayIndexOutOfBoundsException");
-        }finally {
+        } finally {
             assert System.out != null;
             System.out.println("Always verify the length of the array variables");
         }
     }
 
     @Test
-    public void getPropertiesFileInHashMap(){
+    public void getPropertiesFileInHashMap() {
         Properties properties = new Properties();
         TreeMap<String, String> propertiesMap = new TreeMap<>();
         try {
@@ -299,24 +295,24 @@ public class RandomFeaturesTest {
     }
 
     @Test
-    public void testInt(){
+    public void testInt() {
         int x = 100;
         int y = (x > 5) ? (x < 20 ? 1 : 0) : -1;
         System.out.println(y);
     }
 
     @Test
-    public void testIntLarge(){
+    public void testIntLarge() {
         int x = 100;
-        int y= 1000;
+        int y = 1000;
         int large = (x > y) ? x : y;
         System.out.println(large);
     }
 
     @Test
-    public void testIntLargeMathMax(){
+    public void testIntLargeMathMax() {
         int x = 100;
-        int y= 1000;
+        int y = 1000;
         int large = Math.max(x, y);
         System.out.println(large);
     }
