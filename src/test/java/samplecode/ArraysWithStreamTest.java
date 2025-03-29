@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ArrayListSortTest {
+public class ArraysWithStreamTest {
 
     @Test
     public void testSort() {
