@@ -11,13 +11,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
+import static org.example.TestData.BLANK_CELL;
+
 public class ExcelReaderSheets {
 
     public static Map<String, List<HashMap<String, String>>> readAllSheets(String filePath) {
         Map<String, List<HashMap<String, String>>> workbookData = new HashMap<>();
 
-        try (FileInputStream fis = new FileInputStream(new File(filePath));
-             Workbook workbook = new XSSFWorkbook(fis)) {
+        try (FileInputStream fis = new FileInputStream(new File(filePath)); Workbook workbook = new XSSFWorkbook(fis)) {
 
             // Iterate through all sheets
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -59,20 +60,14 @@ public class ExcelReaderSheets {
 
     private static String getCellValueAsString(Cell cell) {
         if (cell == null) return "";
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue().trim();
-            case NUMERIC:
-                return String.valueOf(cell.getNumericCellValue());
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case FORMULA:
-                return cell.getCellFormula();
-            case BLANK:
-                return "";
-            default:
-                return "";
-        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
+            case BLANK -> BLANK_CELL;
+            default -> "";
+        };
     }
 
     public static void main(String[] args) {

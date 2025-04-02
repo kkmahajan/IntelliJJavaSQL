@@ -14,13 +14,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.example.TestData.BLANK_CELL;
+
 public class ExcelReader {
 
     public static List<List<String>> readExcel(String filePath) {
         List<List<String>> data = new ArrayList<>();
 
-        try (FileInputStream fis = new FileInputStream(new File(filePath));
-             Workbook workbook = new XSSFWorkbook(fis)) {
+        try (FileInputStream fis = new FileInputStream(new File(filePath)); Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0); // Read the first sheet
             for (Row row : sheet) {
@@ -39,8 +40,7 @@ public class ExcelReader {
     public static List<HashMap<String, String>> readExcelAsMap(String filePath) {
         List<HashMap<String, String>> dataList = new ArrayList<>();
 
-        try (FileInputStream fis = new FileInputStream(new File(filePath));
-             Workbook workbook = new XSSFWorkbook(fis)) {
+        try (FileInputStream fis = new FileInputStream(new File(filePath)); Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0); // Read first sheet
             Iterator<Row> rowIterator = sheet.iterator();
@@ -78,7 +78,7 @@ public class ExcelReader {
             case NUMERIC -> String.valueOf(cell.getNumericCellValue());
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             case FORMULA -> cell.getCellFormula();
-            case BLANK -> "blank_cell";
+            case BLANK -> BLANK_CELL;
             default -> "";
         };
     }
