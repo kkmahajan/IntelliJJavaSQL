@@ -22,8 +22,7 @@ public class Array {
         Integer[] newArray = {5, 42, 2, 21, 1};
         Arrays.sort(newArray, Collections.reverseOrder());
         int[] e = new int[]{1, 2, 3, 4, 5, 6,};
-        int[] g = new int[10];
-        Arrays.fill(g, -1); // Update the default value in the array for all elements
+        Arrays.fill(a, -1); // Update the default value in the array for all elements
 //      int[] f = new int[]; // Illegal initialization of array as length is not specified
         System.out.println("Array a[] : " + Arrays.toString(a));
         System.out.println("Array b[] : " + Arrays.toString(b));
@@ -31,7 +30,7 @@ public class Array {
         System.out.println("Array c[] : " + Arrays.toString(c) + " -- Length of c[] : " + c.length);
         System.out.println("Array d[] sorted by Arrays.sort(d): " + Arrays.toString(d));
         System.out.println("Array e[] : " + Arrays.toString(e));
-        System.out.println("Array g[] : " + Arrays.toString(g));
+        System.out.println("Array a[] after fill with -1: " + Arrays.toString(a));
         System.out.println("Array newArray[] sorted in descending order by Arrays.sort(newArray, Collections.reverseOrder()): " + Arrays.toString(newArray));
 
         Integer[] defaultArray = {3, 1, 56, 123, 11, 2, 5};
