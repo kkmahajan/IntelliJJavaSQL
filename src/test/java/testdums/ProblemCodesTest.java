@@ -94,10 +94,15 @@ public class ProblemCodesTest {
      */
     @Test
     public void testPower() {
+
         System.out.println(Math.pow(2, 3));
     }
 
-    // Write a method to check and print the repeating characters with the number of occurrences in a string using Java
+    /**
+     * Write a method to check and print the repeating characters with the number
+     * of occurrences in a string using Java
+     */
+
     @Test
     public void testRepeatingCharacters() {
         String str = "Kaustubh";
@@ -108,27 +113,6 @@ public class ProblemCodesTest {
                     System.out.println(chars[i]);
                 }
             }
-        }
-    }
-
-    @Test
-    public void printFibonacciSeriesUsingForLoop() {
-        printFibonacciSeries(10);
-    }
-
-    private void printFibonacciSeries(int n) {
-        if (n <= 0) {
-            System.out.println("Please enter a positive integer.");
-            return;
-        }
-
-        int a = 0, b = 1;
-        System.out.println("Fibonacci Series:");
-        for (int i = 0; i < n; i++) {
-            System.out.print(a + (i < n - 1 ? ", " : "\n"));
-            int c = a + b;
-            a = b;
-            b = c;
         }
     }
 }

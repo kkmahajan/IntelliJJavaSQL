@@ -3,9 +3,10 @@ package testdums;
 import java.util.HashMap;
 
 public class Fibonacci {
-    private HashMap<Integer, Integer> memo = new HashMap<>();
+    private final HashMap<Integer, Integer> memo = new HashMap<>();
 
     public static void main(String[] args) {
+
         new Fibonacci().printFibonacciMemoized(10);
     }
 
