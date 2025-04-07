@@ -1,4 +1,4 @@
-package abs;
+package abstractexample;
 
 public abstract class AbstractExample {
 
@@ -7,6 +7,6 @@ public abstract class AbstractExample {
     public abstract void abstractMethod();
 
     public void nonAbstractMethod() {
-        System.out.println("This is a non-abstract method.");
+        System.out.println("This is a non-abstract method implemented in an Abstract class.");
     }
 }
