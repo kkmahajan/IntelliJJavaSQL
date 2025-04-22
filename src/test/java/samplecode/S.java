@@ -22,7 +22,7 @@ public class S {
         for (char c : s1.toCharArray()) {
             charCountMap.put(c, charCountMap.getOrDefault(c, 0) + 1);
         }
-        System.out.println("Map after S1 : " + charCountMap);
+//        System.out.println("Map after S1 : " + charCountMap);
         // Decrease frequency based on second string
         for (char c : s2.toCharArray()) {
             if (!charCountMap.containsKey(c) || charCountMap.get(c) == 0) {
@@ -30,7 +30,7 @@ public class S {
             }
             charCountMap.put(c, charCountMap.get(c) - 1);
         }
-        System.out.println("Map after S2 : " + charCountMap);
+//        System.out.println("Map after S2 : " + charCountMap);
         return true;
     }
 }

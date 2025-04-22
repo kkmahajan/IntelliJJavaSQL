@@ -9,6 +9,8 @@ public class NewClassDemo extends AbstractExample {
 
     @Override
     public void nonAbstractMethod() {
+        System.out.println("This is printing through overridden method before super");
         super.nonAbstractMethod();
+        System.out.println("This is printing through overridden method after Super");
     }
 }

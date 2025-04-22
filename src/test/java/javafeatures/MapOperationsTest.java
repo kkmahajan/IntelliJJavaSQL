@@ -7,7 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class MapOperations {
+import static org.example.Utils.printMapAsJson;
+
+public class MapOperationsTest {
 
     @Test
     public void testMap() {
@@ -26,11 +28,17 @@ public class MapOperations {
         myMap1.put("key", "value");
         myMap1.put("key2", "value2");
         myMap1.put("key4", "value4");
+        myMap1.put("Zebra", "value4");
+        myMap1.put("zebra", "value4");
         myMap1.put("key0", "value0");
         myMap1.put("abc0", "value0");
         myMap1.put("1", "1");
+        myMap1.put("3", "1");
+        myMap1.put("2", "1");
         System.out.println("Tree Map : " + myMap1);
+        printMapAsJson(myMap1);
         System.out.println(myMap1.firstEntry());
+        System.out.println(myMap1.lastEntry());
 
         Map<String, String> myMap2 = new LinkedHashMap<>();
         myMap2.put("key", "value");
@@ -41,5 +49,15 @@ public class MapOperations {
         System.out.println("Linked Hashmap : " + myMap2);
         myMap2.merge("key5", "value5", (k, v) -> "value5");
         System.out.println("Linked Hashmap : " + myMap2);
+    }
+
+    @Test
+    public void testTreeMap() {
+        String str = "Kaustubh";
+        LinkedHashMap<Character, Integer> myMap = new LinkedHashMap<>();
+        for (char ch : str.toCharArray()) {
+            myMap.put(ch, myMap.getOrDefault(ch, 0) + 1);
+        }
+        printMapAsJson(myMap);
     }
 }

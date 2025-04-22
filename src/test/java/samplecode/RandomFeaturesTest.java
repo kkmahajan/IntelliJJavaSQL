@@ -4,10 +4,7 @@ import org.testng.annotations.Test;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
 
 import static org.example.TestData.PROP_FILE_PATH;
 
@@ -317,4 +314,26 @@ public class RandomFeaturesTest {
         System.out.println(large);
     }
 
+    @Test
+    public void testList() {
+        List<String> string = Arrays.asList("My Name Is Kaustubh Mahajan".split(" "));
+        System.out.println(string);
+        for (int i = 0; i < string.size(); i++) {
+            String s = string.get(i);
+            if (s.equals("Kaustubh")) {
+                string.set(i, new StringBuilder(s).reverse().toString());
+            }
+        }
+        System.out.println(string);
+
+        ArrayList<String> stringarray = new ArrayList<>(Arrays.asList("My Name Is Kaustubh Mahajan".replace("Kaustubh", new StringBuilder("Kaustubh").reverse().toString()).split(" ")));
+        System.out.println(stringarray);
+        for (int i = 0; i < stringarray.size(); i++) {
+            String s = stringarray.get(i);
+            if (s.equals("hbutsuaK") || s.equals("Kaustubh")) {
+                stringarray.set(i, new StringBuilder(s).reverse().toString());
+            }
+        }
+        System.out.println(stringarray);
+    }
 }

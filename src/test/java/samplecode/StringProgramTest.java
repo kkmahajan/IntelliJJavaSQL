@@ -1,12 +1,19 @@
 package samplecode;
 
+import org.testng.annotations.Test;
+
 public class StringProgramTest {
-    static String str = "aaaabbbbwwwwddqasaa";
+
+    String str = "aaaabbbbwwwwddqasaa";
 
     /**
      * Print the number of consecutive characters in a string.
      */
-    public static void main(String[] args) {
+    public void main(String[] args) {
+        if (str == null || str.isEmpty()) {
+            System.out.println("String is invalid");
+            return;
+        }
         int count;
         for (int i = 0; i < str.length(); i = i + count) {
             count = 1;
@@ -19,17 +26,15 @@ public class StringProgramTest {
             }
             System.out.print(String.valueOf(str.charAt(i)) + count);
         }
-
-        System.out.println("\n****Compress String - StringBuilder Method****\n" + compressString(str));
     }
 
     /**
      * Same code using StringBuilder
      *
-     * @param str
-     * @return
+     * @param str as String
+     * @return compressed as String
      */
-    public static String compressString(String str) {
+    private String compressString(String str) {
         if (str == null || str.isEmpty()) {
             return "";
         }
@@ -39,11 +44,16 @@ public class StringProgramTest {
             if (str.charAt(i) == str.charAt(i - 1)) {
                 count++;
             } else {
-                compressed.append(str.charAt(i - 1)).append(count);
+                compressed.append(str.charAt(i - 1)).append(count).append(" ");
                 count = 1;
             }
         }
-        compressed.append(str.charAt(str.length() - 1)).append(count);
+        compressed.append(str.charAt(str.length() - 1)).append(count).append(" ");
         return compressed.toString();
+    }
+
+    @Test
+    public void testCompressString() {
+        System.out.println("\n****Compress String - StringBuilder Method****\n" + compressString(str));
     }
 }
