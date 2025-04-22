@@ -17,8 +17,8 @@ import static org.example.TestData.*;
 
 public class HikariConnectionTest {
 
-    static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
     static final Logger LOGGER = Logger.getLogger(HikariConnectionTest.class.getName());
+    static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
 
     @Test
     public static void sqlTestingWithHikari() {
@@ -41,10 +41,12 @@ public class HikariConnectionTest {
                 statement.setQueryTimeout(5); // 5 seconds
                 ResultSet resultSet = statement.executeQuery(EMP_SEL);
                 while (resultSet.next()) {
-                    System.out.println(resultSet.getString("EMP_ID"));
-                    System.out.println(resultSet.getString("EMP_NAME"));
-                    System.out.println(resultSet.getString("EMP_DEPT"));
-                    System.out.println(resultSet.getString("EMP_AGE"));
+                    System.out.print(resultSet.getString("EMP_ID") + ", ");
+                    System.out.print(resultSet.getString("EMP_NAME") + ", ");
+                    System.out.print(resultSet.getString("EMP_DEPT") + ", ");
+                    System.out.print(resultSet.getString("EMP_AGE") + ", ");
+                    System.out.print(resultSet.getString("EMP_SALARY"));
+                    System.out.println();
                 }
             }
         } catch (SQLException e) {

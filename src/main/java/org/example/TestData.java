@@ -10,6 +10,7 @@ public class TestData {
     public static final String SQL_DB_USERNAME = "SQL_DB_USERNAME";
     public static final String SQL_DB_KEY = "SQL_DB_Key";
     public static final String sqlDbUrl = "sqlDbUrl";
+    public static final String BLANK_CELL = "**blank_cell**";
 
     //Paths
     public static final String PROP_FILE_PATH = "src/test/resources/config.properties";

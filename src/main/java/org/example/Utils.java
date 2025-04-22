@@ -16,6 +16,7 @@ public class Utils {
 
     /**
      * Convert a List<Map<String, Object>> to Json String
+     *
      * @param list as List<Map<String, Object>>
      * @return Json String
      */
@@ -32,8 +33,9 @@ public class Utils {
 
     /**
      * Convert a List<Map<String, Object>> to Json String using ObjectMapper with default pretty printer
+     *
      * @param list as List<Map<String, Object>>
-     * @return  Json String
+     * @return Json String
      */
     public static String listOfMapToPrettyJsonStringUsingJackson(List<Map<String, Object>> list) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -48,20 +50,26 @@ public class Utils {
 
     /**
      * Convert a List<Map<String, Object>> to Json String using Gson
+     *
      * @param list as List<Map<String, Object>>
      * @return Json String
      */
-    public static  String listOfMapToJsonStringUsingGson(List<Map<String, Object>> list){
+    public static String listOfMapToJsonStringUsingGson(List<Map<String, Object>> list) {
         return new Gson().toJson(list);
     }
 
     /**
      * Convert a List<Map<String, Object>> to Json String using Gson with default pretty printer
+     *
      * @param list as List<Map<String, Object>>
      * @return Json String
      */
-    public static  String listOfMapToPrettyJsonStringUsingGson(List<Map<String, Object>> list){
+    public static String listOfMapToPrettyJsonStringUsingGson(List<Map<String, Object>> list) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(list);
+    }
+
+    public static void printMapAsJson(Object map) {
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(map));
     }
 }
