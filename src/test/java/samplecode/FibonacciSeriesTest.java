@@ -1,53 +1,42 @@
 package samplecode;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FibonacciSeriesTest {
 
-    public static void main(String[] args) {
-        printFibonacciSeries(7);
-    }
-
-    /**
-     * This method is printing 10 numbers of fibonacci series
-     */
     @Test
-    public static void fibonacci() {
-        int n = 10;
-        int num1 = 0;
-        int num2 = 1;
-        System.out.print("Fibonacci Series: " + num1 + ", " + num2 + ",");
-        for (int i = 2; i < n; i++) {
-            int num3 = num1 + num2;
-            System.out.print(num3);
-            System.out.print(", ");
-            num1 = num2;
-            num2 = num3;
-        }
-    }
-
-    /**
-     * This method is printing n numbers of fibonacci series
-     * @param n as int
-     */
-    private static void printFibonacciSeries(int n) {
-        if (n <= 0) {
-            System.out.println("Please enter a positive integer.");
-            return;
-        }
-        int a = 0, b = 1;
-        System.out.print("\nFibonacci Series for " + n + " digits : ");
-        for (int i = 0; i < n; i++) {
-            System.out.print(a + (i < n - 1 ? ", " : "\n"));
-            int c = a + b;
-            a = b;
-            b = c;
-        }
+    public void shouldGenerateFirstTenFibonacciNumbers() {
+        Assert.assertEquals(
+                fibonacci(10),
+                List.of(0, 1, 1, 2, 3, 5, 8, 13, 21, 34)
+        );
     }
 
     @Test
-    public void printFibonacciSeriesUsingForLoop() {
-        printFibonacciSeries(10);
-        printFibonacciSeries(6);
+    public void shouldReturnEmptyListForNonPositiveLength() {
+        Assert.assertTrue(fibonacci(0).isEmpty());
+        Assert.assertTrue(fibonacci(-1).isEmpty());
+    }
+
+    private List<Integer> fibonacci(int length) {
+        if (length <= 0) {
+            return List.of();
+        }
+
+        List<Integer> numbers = new ArrayList<>(length);
+        int previous = 0;
+        int current = 1;
+
+        for (int i = 0; i < length; i++) {
+            numbers.add(previous);
+            int next = previous + current;
+            previous = current;
+            current = next;
+        }
+        return numbers;
     }
 }

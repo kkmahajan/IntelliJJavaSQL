@@ -1,36 +1,25 @@
 package org.example;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.example.TestData.PROP_FILE_PATH;
 
 public class PropertiesFileSetup {
 
-    /**
-     * Set properties file using FileInputStream
-     *
-     * @return Properties object
-     */
     public Properties setProperties() {
+        Properties properties = new Properties();
+        Path propertiesPath = Path.of(PROP_FILE_PATH);
 
-        final Logger LOGGER = Logger.getLogger(PropertiesFileSetup.class.getName());
-        Properties prop = new Properties();
-        FileInputStream fileInputStream;
-
-        try {
-            fileInputStream = new FileInputStream(PROP_FILE_PATH);
-            prop.load(fileInputStream);
-        } catch (FileNotFoundException fife) {
-            LOGGER.log(Level.SEVERE, "Properties file not found on the given location", fife);
+        try (InputStream inputStream = Files.newInputStream(propertiesPath)) {
+            properties.load(inputStream);
+            return properties;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(
+                    "Unable to load properties from " + propertiesPath.toAbsolutePath(), e);
         }
-
-        return prop;
     }
 }
