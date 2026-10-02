@@ -1,5 +1,6 @@
 package javafeatures;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.LinkedHashSet;
@@ -7,28 +8,38 @@ import java.util.Set;
 
 public class RemoveDuplicatesTest {
 
-    public static void main(String[] args) {
-        String input = "Capgemini";
-        System.out.println("String without duplicates: " + removeDuplicates(input));
-    }
-
-    public static String removeDuplicates(String str) {
-        Set<Character> seen = new LinkedHashSet<>();
-        for (char c : str.toCharArray()) seen.add(c);
-        StringBuilder sb = new StringBuilder();
-        seen.forEach(sb::append);
-        return sb.toString();
+    @Test
+    public void shouldRemoveDuplicateCharactersAndPreserveOrder() {
+        Assert.assertEquals(removeDuplicates("Capgemini"), "Capgemin");
     }
 
     @Test
-    public static void reverseStringByWord() {
-        String inputString = "i love java programming";
-        String[] words = inputString.split(" ");
-        String reversedString = "";
+    public void shouldReverseWordOrder() {
+        Assert.assertEquals(reverseWords("i love java programming"), "programming java love i");
+    }
+
+    private String removeDuplicates(String input) {
+        Set<Character> seen = new LinkedHashSet<>();
+        StringBuilder result = new StringBuilder();
+
+        for (char character : input.toCharArray()) {
+            if (seen.add(character)) {
+                result.append(character);
+            }
+        }
+        return result.toString();
+    }
+
+    private String reverseWords(String input) {
+        String[] words = input.trim().split("\\s+");
+        StringBuilder result = new StringBuilder();
 
         for (int i = words.length - 1; i >= 0; i--) {
-            reversedString += words[i] + " ";
+            if (!result.isEmpty()) {
+                result.append(' ');
+            }
+            result.append(words[i]);
         }
-        System.out.println("Reversed string by word: " + reversedString.trim());
+        return result.toString();
     }
 }
