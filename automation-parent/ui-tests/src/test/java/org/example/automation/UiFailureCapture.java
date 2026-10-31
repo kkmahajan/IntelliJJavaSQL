@@ -16,5 +16,7 @@ final class UiFailureCapture implements AfterTestExecutionCallback {
         Files.createDirectories(folder);
         byte[] png = ((TakesScreenshot) test.driver).getScreenshotAs(OutputType.BYTES);
         Files.write(folder.resolve(context.getRequiredTestMethod().getName() + ".png"), png);
+        io.qameta.allure.Allure.addAttachment("Selenium failure screenshot", "image/png",
+                new java.io.ByteArrayInputStream(png), ".png");
     }
 }
