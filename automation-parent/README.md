@@ -61,3 +61,34 @@ mvn -pl ui-tests clean test -Dui.tests=true
 ```
 
 Note: The first two commands run the offline Mockito and WireMock tests; the API integration tests skip unless integration.tests=true. Run the entire reactor with mvn clean test to include all offline tests.
+
+## Phase 4 — Selenium Page Objects and Playwright Java
+
+The ui-tests module now includes:
+- UiTestSupport: reusable ChromeDriver lifecycle, optional headless mode and configurable app URL.
+- UserManagerPage: Selenium Page Object with explicit waits for user CRUD operations.
+- UserManagerCrudUiTest: create/search/edit/delete and duplicate-email UI checks.
+- PlaywrightUserManagerTest: independent Playwright Chromium CRUD scenario.
+- Existing UserManagerUiTest smoke test remains available.
+
+The sample app must be running at http://localhost:8080 (or set -Dapp.baseUrl=...).
+
+```powershell
+# Offline reactor tests (UI suites skip unless opted in):
+mvn clean test
+
+# Selenium smoke + CRUD (Chrome installed):
+mvn -pl ui-tests clean test "-Dui.tests=true"
+
+# Install Playwright Chromium once (PowerShell, from automation-parent):
+mvn -pl ui-tests dependency:build-classpath "-Dmdep.outputFile=ui-tests/target/playwright-classpath.txt"
+$classpath = Get-Content ui-tests/target/playwright-classpath.txt
+java -cp $classpath com.microsoft.playwright.CLI install chromium
+
+# Playwright CRUD (separate opt-in flag):
+mvn -pl ui-tests clean test "-Dplaywright.tests=true"
+
+# For visible browser windows add "-Dui.headless=false"
+```
+
+Selenium and Playwright mutate the in-memory user store with uniquely named test users and attempt cleanup. Run browser suites against the local disposable sample app, not production.
