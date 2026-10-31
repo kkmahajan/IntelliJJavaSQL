@@ -124,7 +124,10 @@ The same CI workflow generates **both report formats** from all test modules and
 - [Allure HTML report](reports/latest/allure/index.html) — powered by `allure-junit5` adapters in every test module.
 - [Extent Spark HTML report](reports/latest/extent/index.html) — built by `reporting-tools` from Surefire XML for every module.
 - Both reports are also uploaded as GitHub Actions artifacts; `target/combined-allure-results/` contains combined raw Allure results.
-- GitHub's normal source-code viewer may display HTML as source rather than execute it. To browse the interactive reports, download the CI artifact and open the HTML locally. Hosting via GitHub Pages requires a separate Pages configuration.
+- **GitHub Pages (browser viewing):** After enabling **Settings → Pages → Build and deployment → Source: GitHub Actions** and a successful Pages deployment, open the [report dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/), [Allure](https://kkmahajan.github.io/IntelliJJavaSQL/allure/), or [Extent](https://kkmahajan.github.io/IntelliJJavaSQL/extent/). These links are expected deployment URLs, not guaranteed to be live until Pages succeeds.
+- The workflow publishes the `reports/latest/` folder as the **site root**, in addition to committing reports to the feature branch and uploading CI artifacts. A `.nojekyll` file is generated for static assets.
+- **Security:** Pages content may be public. Do not include credentials, tokens, customer data, or other sensitive information in test names, error messages, screenshots, or reports.
+- GitHub's normal source-code viewer may display HTML as source rather than execute it; use the GitHub Pages URLs to view interactive HTML without downloading.
 - The published reports are generated artifacts, not source files. Avoid manual edits.
 
 **Generate Extent locally** after running the tests:
