@@ -260,3 +260,10 @@ Install Playwright Chromium first if running locally. GitHub Actions installs it
 6. Run the appropriate test stage, inspect both report formats, then verify CI deployment.
 
 **Reporting boundaries:** HTTP bodies are recorded for REST Assured requests; browser network events currently record method/URL/status for the user API, not all browser request/response bodies. Screenshots are evidence of browser state, not a replacement for assertions. Report output is public on GitHub Pages, so test data must be non-sensitive.
+
+
+### Test-type filters in CI reports
+
+The GitHub Pages dashboard at https://kkmahajan.github.io/IntelliJJavaSQL/ now generates an interactive test table from the **actual combined Allure JSON results**. Select **All**, **UI**, **API**, **Selenium**, **Playwright**, or **Unit**; search by test name and follow **View steps** to the detailed Allure result. UI includes both Selenium and Playwright. Allure also receives corresponding test-type tags; Extent assigns the same test types as category filters.
+
+Implementation: `reporting-tools/classify_results.py` tags result JSON; `reporting-tools/build_dashboard.py` generates the interactive static HTML dashboard; `ExtentReportGenerator.java` assigns categories. GitHub Actions runs these generators during report publishing. Historical run artifacts remain unchanged; filters appear on newly generated reports after CI succeeds.
