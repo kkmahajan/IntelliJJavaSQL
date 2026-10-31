@@ -1,30 +1,38 @@
-# Multi-module test automation (phase 1)
+# Multi-module test automation — Phase 2
 
-This is an isolated Maven reactor alongside the original project. The original root `pom.xml` and tests remain unchanged.
+This isolated Maven reactor does not change the repository root pom.xml.
 
-Modules:
-- `sample-app`: Spring Boot REST API and locally hosted HTML UI.
-- `api-tests`: JUnit 5 + REST Assured sample API integration test.
-- `ui-tests`: JUnit 5 + Selenium sample UI smoke test.
+## Modules
+- sample-app: Spring Boot User Manager API and browser UI; in-memory data resets on restart.
+- api-tests: JUnit 5 and REST Assured CRUD and negative integration tests.
+- ui-tests: JUnit 5 and Selenium UI smoke test.
 
-Requirements: Java 21, Maven, and Chrome/compatible Selenium driver setup for UI execution.
+Requires Java 21+, Maven, and Chrome for UI tests.
 
-From `automation-parent`:
+From automation-parent, build and start the application:
 
 ```bash
 mvn clean test
 mvn -pl sample-app spring-boot:run
 ```
 
-In another terminal, with the app running:
+In a second terminal, while the application is running:
 
 ```bash
 mvn -pl api-tests test -Dintegration.tests=true
 mvn -pl ui-tests test -Dui.tests=true
 ```
 
-Use `-Dapp.baseUrl=http://localhost:8080` to override the target.
+Use -Dapp.baseUrl=http://localhost:8080 to override the target. Integration tests skip by default.
 
-The API/UI integration tests skip by default so ordinary offline builds don't require a running server or browser.
+## REST API
+- GET /api/users: list users
+- GET /api/users/{id}: fetch or 404
+- POST /api/users: create with JSON {name,email}; returns 201 and Location
+- PUT /api/users/{id}: update or 404
+- DELETE /api/users/{id}: delete (204) or 404
+- Invalid name/email: 400; duplicate email: 409
 
-Next phases: Mockito, WireMock, JSON Schema, Playwright, Cucumber, Testcontainers, JMeter, accessibility, reporting and CI. The code has not yet been built in this environment.
+The sample user (id 1, John Watson) exists on startup. The local UI supports search, create, edit, and delete. All data is in memory and resets when the application restarts. The API integration tests create unique records and clean up afterward.
+
+This is a local automation demonstration, not a production system with authentication or guaranteed transactional concurrency. Future phases: Mockito, WireMock, JSON Schema, Playwright, Cucumber, Testcontainers, performance, accessibility, reporting, CI.
