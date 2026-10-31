@@ -92,3 +92,21 @@ mvn -pl ui-tests clean test "-Dplaywright.tests=true"
 ```
 
 Selenium and Playwright mutate the in-memory user store with uniquely named test users and attempt cleanup. Run browser suites against the local disposable sample app, not production.
+
+## Phase 5 — GitHub Actions CI and diagnostics
+
+Workflow: `.github/workflows/automation-framework-ci.yml` (relative to repository root).
+
+It triggers only for pushes to `feature/multi-module-test-framework` that change `automation-parent/**` or the workflow itself, plus manual `workflow_dispatch`. It does not run on or update `master`.
+
+The Ubuntu/Java 21 job:
+1. Builds the Maven reactor and runs offline Mockito/WireMock tests.
+2. Starts the sample Spring Boot app and polls `/api/users/1` for readiness.
+3. Runs REST Assured CRUD and JSON Schema tests against the app.
+4. Installs Chrome and runs Selenium smoke/CRUD tests.
+5. Installs Playwright Chromium and runs the Playwright CRUD test.
+6. Uploads Surefire XML/text reports, app logs and UI failure screenshots, even if a step fails.
+
+Inspect results in GitHub → Actions → Automation Framework CI → selected run. Download the `automation-framework-reports-...` artifact for diagnostic files (retained for 14 days).
+
+The Selenium `UiFailureCapture` JUnit extension takes screenshots before WebDriver teardown when a test fails. Playwright captures a screenshot when its CRUD scenario throws. No screenshots are produced for passing tests. Browser test suites modify only the disposable local in-memory application.
