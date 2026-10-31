@@ -36,3 +36,28 @@ Use -Dapp.baseUrl=http://localhost:8080 to override the target. Integration test
 The sample user (id 1, John Watson) exists on startup. The local UI supports search, create, edit, and delete. All data is in memory and resets when the application restarts. The API integration tests create unique records and clean up afterward.
 
 This is a local automation demonstration, not a production system with authentication or guaranteed transactional concurrency. Future phases: Mockito, WireMock, JSON Schema, Playwright, Cucumber, Testcontainers, performance, accessibility, reporting, CI.
+
+## Phase 3 — JUnit 5, Mockito, WireMock and JSON Schema
+
+The controller delegates to UserService, which uses a UserRepository interface backed by InMemoryUserRepository. Mockito tests in sample-app verify validation, create/update/delete and not-found behavior without starting the web server.
+
+WireMockExternalApiTest in api-tests starts an ephemeral local WireMock server and tests a Java HttpClient against success, HTTP 500, invalid payload and delayed-response timeout. These tests do not need the sample app or internet access.
+
+UsersSchemaTest in api-tests checks the GET /api/users/1 response against src/test/resources/schemas/user.json and verifies the list response. These integration tests require the running sample app.
+
+Run from automation-parent:
+
+```bash
+mvn -pl sample-app clean test
+mvn -pl api-tests clean test
+mvn -pl sample-app spring-boot:run
+```
+
+In another terminal while sample-app runs:
+
+```bash
+mvn -pl api-tests clean test -Dintegration.tests=true
+mvn -pl ui-tests clean test -Dui.tests=true
+```
+
+Note: The first two commands run the offline Mockito and WireMock tests; the API integration tests skip unless integration.tests=true. Run the entire reactor with mvn clean test to include all offline tests.
