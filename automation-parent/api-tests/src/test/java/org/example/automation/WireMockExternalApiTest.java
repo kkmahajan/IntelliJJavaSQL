@@ -14,7 +14,7 @@ class WireMockExternalApiTest {
     private WireMockServer server;
 
     @BeforeEach void start() {
-        server = new WireMockServer(options().dynamicPort());
+        server = new WireMockServer(com.github.tomakehurst.wiremock.core.WireMockConfiguration.options().dynamicPort());
         server.start();
     }
 
