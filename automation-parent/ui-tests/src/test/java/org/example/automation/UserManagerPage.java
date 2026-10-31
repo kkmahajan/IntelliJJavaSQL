@@ -81,6 +81,10 @@ final class UserManagerPage {
         wait.until(d -> d.findElement(By.id("message")).getText().contains(message));
     }
 
+    void waitForAnyMessage() {
+        wait.until(d -> !d.findElement(By.id("message")).getText().isBlank());
+    }
+
     String message() {
         return driver.findElement(By.id("message")).getText();
     }
