@@ -47,6 +47,18 @@ class PlaywrightUserManagerTest {
                         assertFalse(page.locator("#users").innerText().contains(deleteName));
                     }
                 }
+            } catch (RuntimeException | AssertionError failure) {
+                try {
+                    Path folder = Path.of("target", "failure-artifacts");
+                    Files.createDirectories(folder);
+                    for (Page failedPage : browser.contexts().stream().flatMap(c -> c.pages().stream()).toList()) {
+                        failedPage.screenshot(new Page.ScreenshotOptions().setPath(folder.resolve("playwright-createSearchEditDelete.png")));
+                        break;
+                    }
+                } catch (Exception screenshotError) {
+                    failure.addSuppressed(screenshotError);
+                }
+                throw failure;
             } finally {
                 browser.close();
             }
