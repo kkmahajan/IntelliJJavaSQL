@@ -2,24 +2,48 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Local User Manager</title>
+<title>Service Desk | Users and Support Tickets</title>
 <style>
 body{font-family:system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem;color:#202b39}
 main{display:grid;gap:1rem}input,button{font:inherit;padding:.55rem;border-radius:6px;border:1px solid #aaa}
 button{cursor:pointer}form{display:flex;flex-wrap:wrap;gap:.5rem}ul{padding:0;list-style:none}
 li{display:flex;justify-content:space-between;gap:1rem;padding:.7rem;border-bottom:1px solid #ddd}
 .actions{display:flex;gap:.4rem}#message{min-height:1.5rem}
+section{border:1px solid #e0e5eb;border-radius:12px;padding:1.2rem;background:#fff;box-shadow:0 3px 12px #14243a0b}
+body{max-width:1080px;background:#f5f7fa}h1{margin-bottom:0}.subtitle{color:#64748b;margin-top:0}
+select,textarea{font:inherit;padding:.55rem;border:1px solid #aaa;border-radius:6px}
+textarea{min-width:260px;min-height:55px}.ticket-card{display:grid;gap:.4rem;padding:1rem;border:1px solid #dbe3eb;border-radius:9px;margin:.6rem 0;background:#f9fbfe}
+.ticket-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.ticket-meta{font-size:.85rem;color:#526173}.ticket-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+.tag{border-radius:12px;padding:.2rem .6rem;background:#e8efff;font-size:.8rem}
+#ticket-message{min-height:1.4rem}#ticket-list{display:grid;gap:.4rem}
 </style>
 </head>
 <body><main>
-<h1>User Manager</h1>
+<h1>Service Desk</h1><p class="subtitle">Manage team members and resolve customer support requests through a real workflow.</p>
+<section aria-label="Team members"><h2>Team members</h2>
 <label for="search">Search users</label><input id="search" type="search" placeholder="Search users">
 <form id="user-form">
 <input id="name" name="name" required placeholder="Name" aria-label="Name">
 <input id="email" name="email" type="email" required placeholder="Email" aria-label="Email">
 <button id="save" type="submit">Add user</button><button id="cancel" type="button" hidden>Cancel edit</button>
 </form>
-<p id="message" role="status" aria-live="polite"></p><ul id="users"></ul>
+<p id="message" role="status" aria-live="polite"></p><ul id="users"></ul></section>
+<section aria-label="Support tickets">
+<h2>Support tickets</h2>
+<p class="subtitle">Create a request, assign an owner, prioritize work, and move it from Open to In progress to Resolved.</p>
+<form id="ticket-form">
+<input id="ticket-title" required maxlength="120" placeholder="Issue title" aria-label="Issue title">
+<textarea id="ticket-description" maxlength="2000" placeholder="Describe the issue" aria-label="Issue description"></textarea>
+<select id="ticket-priority" aria-label="Ticket priority"><option value="LOW">Low priority</option><option value="MEDIUM" selected>Medium priority</option><option value="HIGH">High priority</option></select>
+<select id="ticket-assignee" aria-label="Ticket assignee"><option value="">Unassigned</option></select>
+<button id="ticket-save" type="submit">Create ticket</button><button id="ticket-cancel" type="button" hidden>Cancel edit</button>
+</form>
+<p id="ticket-message" role="status" aria-live="polite"></p>
+<div><label for="ticket-status-filter">Status</label> <select id="ticket-status-filter"><option value="">All statuses</option><option value="OPEN">Open</option><option value="IN_PROGRESS">In progress</option><option value="RESOLVED">Resolved</option></select>
+<label for="ticket-priority-filter">Priority</label> <select id="ticket-priority-filter"><option value="">All priorities</option><option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option></select></div>
+<div id="ticket-list" aria-live="polite"></div>
+</section>
 </main>
 <script>
 const search=document.querySelector('#search'),list=document.querySelector('#users');
@@ -45,7 +69,7 @@ function render(){
   actions.append(edit,remove);li.append(info,actions);list.append(li);
  }
 }
-async function load(){users=await request('/api/users');render();}
+async function load(){users=await request('/api/users');render();refreshAssignees();}
 search.addEventListener('input',render);cancel.addEventListener('click',resetForm);
 form.addEventListener('submit',async e=>{
  e.preventDefault();message.textContent='';
@@ -55,4 +79,67 @@ form.addEventListener('submit',async e=>{
  }catch(error){message.textContent=error.message;}
 });
 load().catch(e=>{message.textContent=e.message;});
+
+const ticketForm=document.querySelector('#ticket-form');
+const ticketTitle=document.querySelector('#ticket-title');
+const ticketDescription=document.querySelector('#ticket-description');
+const ticketPriority=document.querySelector('#ticket-priority');
+const ticketAssignee=document.querySelector('#ticket-assignee');
+const ticketStatusFilter=document.querySelector('#ticket-status-filter');
+const ticketPriorityFilter=document.querySelector('#ticket-priority-filter');
+const ticketList=document.querySelector('#ticket-list');
+const ticketMessage=document.querySelector('#ticket-message');
+const ticketSave=document.querySelector('#ticket-save');
+const ticketCancel=document.querySelector('#ticket-cancel');
+let tickets=[],editingTicketId=null;
+function refreshAssignees(){
+ const previous=ticketAssignee.value;
+ ticketAssignee.replaceChildren(new Option('Unassigned',''));
+ users.forEach(u=>ticketAssignee.add(new Option(u.name,u.id)));
+ ticketAssignee.value=previous;
+}
+function resetTicketForm(){ticketForm.reset();editingTicketId=null;ticketSave.textContent='Create ticket';ticketCancel.hidden=true;}
+function renderTickets(){
+ ticketList.replaceChildren();
+ const filtered=tickets.filter(t=>(!ticketStatusFilter.value||t.status===ticketStatusFilter.value)&&(!ticketPriorityFilter.value||t.priority===ticketPriorityFilter.value));
+ if(!filtered.length){const empty=document.createElement('p');empty.textContent='No tickets match your filters.';ticketList.append(empty);return;}
+ for(const t of filtered){
+  const card=document.createElement('article');card.className='ticket-card';card.setAttribute('data-ticket-id',t.id);
+  const head=document.createElement('div');head.className='ticket-head';
+  const title=document.createElement('strong');title.textContent='#'+t.id+' — '+t.title;
+  const badge=document.createElement('span');badge.className='tag';badge.textContent=t.status.replace('_',' ');
+  head.append(title,badge);
+  const detail=document.createElement('p');detail.textContent=t.description||'No description';
+  const meta=document.createElement('div');meta.className='ticket-meta';
+  meta.textContent='Priority: '+t.priority+' | Owner: '+(users.find(u=>u.id===t.assigneeId)?.name||'Unassigned');
+  const actions=document.createElement('div');actions.className='ticket-actions';
+  const edit=document.createElement('button');edit.textContent='Edit';edit.setAttribute('aria-label','Edit ticket '+t.id);
+  edit.addEventListener('click',()=>{editingTicketId=t.id;ticketTitle.value=t.title;ticketDescription.value=t.description;ticketPriority.value=t.priority;ticketAssignee.value=t.assigneeId??'';ticketSave.textContent='Save ticket';ticketCancel.hidden=false;ticketTitle.focus();});
+  actions.append(edit);
+  if(t.status!=='RESOLVED'){
+   const next=t.status==='OPEN'?'IN_PROGRESS':'RESOLVED';
+   const move=document.createElement('button');move.textContent=next==='IN_PROGRESS'?'Start work':'Resolve';
+   move.setAttribute('aria-label',move.textContent+' ticket '+t.id);
+   move.addEventListener('click',async()=>{try{await request('/api/tickets/'+t.id+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});await loadTickets();ticketMessage.textContent='Ticket moved to '+next.replace('_',' ');}catch(e){ticketMessage.textContent=e.message;}});
+   actions.append(move);
+  }
+  const remove=document.createElement('button');remove.textContent='Delete';remove.setAttribute('aria-label','Delete ticket '+t.id);
+  remove.addEventListener('click',async()=>{if(!confirm('Delete ticket #'+t.id+'?'))return;try{await request('/api/tickets/'+t.id,{method:'DELETE'});await loadTickets();ticketMessage.textContent='Ticket deleted';}catch(e){ticketMessage.textContent=e.message;}});
+  actions.append(remove);card.append(head,detail,meta,actions);ticketList.append(card);
+ }
+}
+async function loadTickets(){tickets=await request('/api/tickets');renderTickets();}
+ticketStatusFilter.addEventListener('change',renderTickets);
+ticketPriorityFilter.addEventListener('change',renderTickets);
+ticketCancel.addEventListener('click',resetTicketForm);
+ticketForm.addEventListener('submit',async e=>{
+ e.preventDefault();ticketMessage.textContent='';
+ const editing=editingTicketId!==null;
+ try{
+  const payload={title:ticketTitle.value,description:ticketDescription.value,priority:ticketPriority.value,assigneeId:ticketAssignee.value?Number(ticketAssignee.value):null};
+  await request('/api/tickets'+(editing?'/'+editingTicketId:''),{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  resetTicketForm();await loadTickets();ticketMessage.textContent=editing?'Ticket updated':'Ticket created';
+ }catch(error){ticketMessage.textContent=error.message;}
+});
+loadTickets().catch(e=>{ticketMessage.textContent=e.message;});
 </script></body></html>
