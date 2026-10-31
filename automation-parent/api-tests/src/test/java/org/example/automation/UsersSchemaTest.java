@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.hamcrest.Matchers.*;
 
 class UsersSchemaTest {
     private String baseUrl;
@@ -22,7 +21,6 @@ class UsersSchemaTest {
 
     @Test void userListContainsSchemaValidUsers() {
         given().baseUri(baseUrl).get("/api/users").then().statusCode(200)
-                .body("size()", greaterThanOrEqualTo(1))
-                .body("[0]", matchesJsonSchemaInClasspath("schemas/user.json"));
+                .body(matchesJsonSchemaInClasspath("schemas/users.json"));
     }
 }
