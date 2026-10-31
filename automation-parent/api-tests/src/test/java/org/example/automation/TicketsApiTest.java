@@ -15,6 +15,7 @@ class TicketsApiTest {
     @BeforeEach void setup() {
         assumeTrue(Boolean.getBoolean("integration.tests"), "Enable -Dintegration.tests=true");
         base = System.getProperty("app.baseUrl", "http://localhost:8080");
+        io.restassured.RestAssured.replaceFiltersWith(new ApiExecutionFilter());
     }
 
     private Map<String, Object> input(String title, String priority) {
