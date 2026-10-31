@@ -1,6 +1,6 @@
 # Interview Preparation — Java Multi-Module Test Automation Framework
 
-> **Project:** Java Multi-Module Test Automation Framework  
+> **Project:** Service Desk Application + Java Multi-Module Test Automation Framework  
 > **Repository:** [IntelliJJavaSQL — feature/multi-module-test-framework](https://github.com/kkmahajan/IntelliJJavaSQL/tree/feature/multi-module-test-framework/automation-parent)  
 > **Stack:** Java 21, Maven, JUnit 5, Mockito, REST Assured, WireMock, JSON Schema, Selenium WebDriver, Playwright Java, Spring Boot, GitHub Actions, Allure, ExtentReports, GitHub Pages  
 > **Verified CI baseline:** [Successful run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) — tests and dual-report generation/publication succeeded. GitHub Pages deployment was added later; verify its own CI step before claiming the live URLs work.
@@ -21,7 +21,7 @@ This document is intended for **interview preparation, project explanation, and 
 >
 > Finally, I integrated GitHub Actions to execute the suites on a clean environment, start the application, and generate **both Allure and Extent HTML reports** in the same run. I also configured GitHub Pages deployment so these reports can be hosted as web pages without downloading artifacts.
 >
-> The framework has 26 unique automated tests, all successfully verified in a GitHub Actions CI run.
+> The original 26-test framework baseline was verified in CI; ticket workflow tests were added afterward and require a fresh CI verification.
 
 ## 2. Project architecture
 
@@ -231,3 +231,53 @@ JUnit 5 test suites
 4. Open the latest successful workflow run and show the reporting steps.
 5. If Pages has deployed successfully, demonstrate the dashboard and both reports in a browser.
 6. Explain why publicly hosted reports must not contain secrets or confidential test data.
+
+## 10. Phase 8: Service Desk business application and expanded test coverage
+
+### Interview-ready business explanation
+
+I extended the basic user management application into a **Service Desk** for a small customer support team. A support agent can record a customer issue, add a description, assign it to an existing team member, select a LOW/MEDIUM/HIGH priority, and move the ticket through **OPEN → IN_PROGRESS → RESOLVED**. A supervisor can filter tickets by status and priority. The original team-member management screen is preserved.
+
+**Example user journey:** A customer reports a checkout failure. The agent creates a HIGH-priority ticket, assigns John Watson, starts work, and resolves it. The UI and REST API enforce the same status transitions. Skipping or reversing stages returns 409 Conflict; invalid ticket data returns 400; unknown IDs return 404.
+
+**Technical implementation:** `TicketController` exposes HTTP routes, `TicketService` owns validation and workflow rules, `TicketRepository` stores in-memory tickets, and `UserRepository` validates assignee IDs. The browser calls these same REST endpoints.
+
+| HTTP | Endpoint | Behavior |
+| --- | --- | --- |
+| GET | `/api/tickets` | List; optional status and priority filters |
+| GET | `/api/tickets/{id}` | Read a ticket |
+| POST | `/api/tickets` | Create a ticket in OPEN |
+| PUT | `/api/tickets/{id}` | Update details without resetting status |
+| PATCH | `/api/tickets/{id}/status` | Move to next workflow state |
+| DELETE | `/api/tickets/{id}` | Delete a ticket |
+
+### Additional interview Q&A
+
+**Q19. What real-world workflow does your application model?**
+
+A customer support ticket lifecycle: report a problem, prioritize it, assign an agent, start work, and resolve it. The ticket board supports status and priority filters, making the workflow useful for both agents and supervisors.
+
+**Q20. How did you make the business rules testable?**
+
+I separated controller, service and repository layers. Mockito unit tests verify validation and state transitions without starting a server. REST Assured tests exercise the real HTTP contract, and Selenium tests exercise user-facing workflows.
+
+**Q21. How do you validate ticket status transitions?**
+
+I test allowed transitions OPEN to IN_PROGRESS and IN_PROGRESS to RESOLVED, and rejected transitions such as OPEN directly to RESOLVED or RESOLVED back to OPEN. I verify 409 responses for invalid transitions and 400 for unknown status values.
+
+**Q22. How can the framework accept more tests with minimal configuration?**
+
+New `*Test` classes are automatically discovered by JUnit 5/Surefire within their Maven modules. I added `TicketServiceTest`, `TicketsApiTest` and `ServiceDeskUiTest` without changing the core test execution structure. Existing Allure adapters and the Extent Surefire XML aggregator automatically pick up the additional tests.
+
+**Q23. What would you improve for production readiness?**
+
+Introduce database persistence and Testcontainers, role-based authorization, audit trails, ticket comments, pagination, test fixtures, a dedicated ticket Page Object, and contract validation for ticket responses. The current in-memory demo does not implement these.
+
+### Resume-ready additions
+
+- Extended a Java/Spring Boot application into a **Service Desk** with team management, support ticket creation, assignment, priority filtering and a controlled resolution lifecycle.
+- Designed REST APIs using controller/service/repository separation with validation, meaningful HTTP error handling and explicit workflow rules.
+- Expanded Mockito/JUnit 5 unit tests, REST Assured API regression tests and Selenium UI tests for business scenarios, negative paths and boundary cases.
+- Reused Maven module discovery, GitHub Actions, Allure, Extent Spark and GitHub Pages reporting for the additional test suites.
+
+**Verification note:** The original 26-test baseline was verified before the Service Desk expansion. Do not claim a revised test count or pass rate until the new CI run completes successfully.
