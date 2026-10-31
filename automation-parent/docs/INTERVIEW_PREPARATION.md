@@ -281,3 +281,59 @@ Introduce database persistence and Testcontainers, role-based authorization, aud
 - Reused Maven module discovery, GitHub Actions, Allure, Extent Spark and GitHub Pages reporting for the additional test suites.
 
 **Verification note:** The original 26-test baseline was verified before the Service Desk expansion. Do not claim a revised test count or pass rate until the new CI run completes successfully.
+
+
+## Phase 9 — Detailed execution reporting and Playwright BDD
+
+The test framework records **real execution evidence**, not only test pass/fail status. The same Allure JSON result files drive **Allure HTML** and **Extent Spark HTML**, keeping step names and attachments aligned.
+
+### Business and execution flows
+
+- **REST Assured:** `ApiExecutionFilter` captures each actual HTTP method/URL, request body, response status, response body and elapsed time. It creates nested Allure steps with JSON attachments; Extent displays those steps and attachments by reading the same Allure results. Authorization-related values in JSON bodies and common secret query parameters are redacted. Do not test with real customer data.
+- **Selenium:** Existing JUnit and Page Object flows are preserved. `UserManagerPage` and `ServiceDeskTicketPage` now record navigation, form values, selections, clicks and observed status messages as Allure steps. `UiFailureCapture` attaches a failure screenshot.
+- **Playwright BDD:** The former JUnit Playwright CRUD test is now a Cucumber 7 scenario in `ui-tests/src/test/resources/features/user-management.feature`. Java step definitions in `ui-tests/src/test/java/org/example/automation/bdd/PlaywrightSteps.java` perform the **same** create, search, edit, delete journey. Hooks launch/close Chromium, create unique user data, clean up on failure, and attach screenshots. Gherkin steps and underlying browser actions appear in Allure, along with user-API request and response status events.
+- **Extent:** `reporting-tools/.../ExtentReportGenerator.java` now parses `target/combined-allure-results/*-result.json`, including nested steps and attachments, rather than flattening Surefire XML into a single pass/fail line. The report copies screenshots to `extent/attachments`.
+
+### How to execute
+
+From `automation-parent`, use a running sample app at `http://localhost:8080`:
+
+```powershell
+mvn clean test "-Dcucumber.filter.tags=@offline"
+mvn -pl api-tests test "-Dintegration.tests=true"
+mvn -pl ui-tests test "-Dui.tests=true" "-Dcucumber.filter.tags=@offline"
+mvn -pl ui-tests test "-Dplaywright.tests=true" "-Dcucumber.filter.tags=@playwright"
+```
+
+Install Playwright Chromium first if running locally. GitHub Actions installs it automatically and runs BDD Playwright separately from Selenium. The workflow merges Allure result files from offline, API, Selenium and Playwright stages, then regenerates Allure and Extent and deploys to GitHub Pages after a successful run.
+
+### Where to inspect
+
+- Dashboard: https://kkmahajan.github.io/IntelliJJavaSQL/
+- Allure: https://kkmahajan.github.io/IntelliJJavaSQL/allure/
+- Extent: https://kkmahajan.github.io/IntelliJJavaSQL/extent/
+- Raw BDD JSON: `automation-parent/target/cucumber-report.json` in CI artifacts
+- Failure screenshots: `ui-tests/target/failure-artifacts` and Allure attachments
+
+### How to add another test
+
+1. Define a real business acceptance criterion and expected outcome.
+2. For API tests, use REST Assured in the existing `api-tests` module; the filter captures actual exchanges.
+3. For Selenium, add reusable Page Object actions with descriptive `Allure.step` calls and JUnit assertions.
+4. For Playwright, add a Gherkin scenario and implement each Given/When/Then in a Cucumber step-definition class.
+5. Ensure generated test data is unique and cleaned up. Do not expose secrets or personal data in reports.
+6. Run the appropriate test stage, inspect both report formats, then verify CI deployment.
+
+**Reporting boundaries:** HTTP bodies are recorded for REST Assured requests; browser network events currently record method/URL/status for the user API, not all browser request/response bodies. Screenshots are evidence of browser state, not a replacement for assertions. Report output is public on GitHub Pages, so test data must be non-sensitive.
+
+### Interview questions on BDD and step reporting
+
+**Why Cucumber only for Playwright?** The requirement was to keep Selenium functional tests intact while expressing the Playwright CRUD journey as readable business scenarios. This demonstrates both JUnit/POM and Cucumber/BDD approaches.
+
+**What is a step definition?** A Java method annotated with `@Given`, `@When` or `@Then` that binds a Gherkin sentence to browser interactions or assertions. Hooks manage setup, cleanup and screenshots.
+
+**How does Extent get the same details as Allure?** Both HTML reports read the same structured Allure results. The Extent generator converts nested result steps and attachment references to Extent nodes, avoiding inconsistent independent logging.
+
+**How are API calls captured?** A REST Assured filter surrounds the actual request, records method/URL/body, then records status/body/duration from the actual response. It does not invent expected values as observed evidence.
+
+**How is test reliability preserved?** Unique test data, cleanup, existing Selenium waits and Page Objects, a dedicated Cucumber stage, and CI verification of both reporting formats.
