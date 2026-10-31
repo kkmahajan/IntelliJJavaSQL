@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local User Manager</title></head>
+<body>
+<main><h1>User Manager</h1><label for="search">Search users</label><input id="search" type="search" placeholder="Search users"><ul id="users"></ul></main>
+<script>
+const search=document.querySelector('#search');
+const list=document.querySelector('#users');
+let users=[];
+function render(){list.replaceChildren(...users.filter(u=>u.name.toLowerCase().includes(search.value.toLowerCase())).map(u=>{const li=document.createElement('li');li.textContent=u.name+' — '+u.email;return li;}));}
+search.addEventListener('input',render);
+fetch('/api/users').then(r=>{if(!r.ok)throw Error('Unable to load users');return r.json();}).then(data=>{users=data;render();}).catch(()=>{list.textContent='Unable to load users';});
+</script>
+</body></html>
