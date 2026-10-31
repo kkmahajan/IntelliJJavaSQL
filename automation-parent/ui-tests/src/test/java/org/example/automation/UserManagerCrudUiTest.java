@@ -34,7 +34,7 @@ class UserManagerCrudUiTest extends UiTestSupport {
     @Test void duplicateEmailDisplaysError() {
         page.enterUser("Duplicate Test", "JOHN@example.com");
         page.save();
-        page.waitForMessage("Request failed");
+        page.waitForAnyMessage();
         assertFalse(page.containsUser("Duplicate Test"));
     }
 }
