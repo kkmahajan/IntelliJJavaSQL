@@ -1,14 +1,58 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local User Manager</title></head>
-<body>
-<main><h1>User Manager</h1><label for="search">Search users</label><input id="search" type="search" placeholder="Search users"><ul id="users"></ul></main>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local User Manager</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem;color:#202b39}
+main{display:grid;gap:1rem}input,button{font:inherit;padding:.55rem;border-radius:6px;border:1px solid #aaa}
+button{cursor:pointer}form{display:flex;flex-wrap:wrap;gap:.5rem}ul{padding:0;list-style:none}
+li{display:flex;justify-content:space-between;gap:1rem;padding:.7rem;border-bottom:1px solid #ddd}
+.actions{display:flex;gap:.4rem}#message{min-height:1.5rem}
+</style>
+</head>
+<body><main>
+<h1>User Manager</h1>
+<label for="search">Search users</label><input id="search" type="search" placeholder="Search users">
+<form id="user-form">
+<input id="name" name="name" required placeholder="Name" aria-label="Name">
+<input id="email" name="email" type="email" required placeholder="Email" aria-label="Email">
+<button id="save" type="submit">Add user</button><button id="cancel" type="button" hidden>Cancel edit</button>
+</form>
+<p id="message" role="status" aria-live="polite"></p><ul id="users"></ul>
+</main>
 <script>
-const search=document.querySelector('#search');
-const list=document.querySelector('#users');
-let users=[];
-function render(){list.replaceChildren(...users.filter(u=>u.name.toLowerCase().includes(search.value.toLowerCase())).map(u=>{const li=document.createElement('li');li.textContent=u.name+' — '+u.email;return li;}));}
-search.addEventListener('input',render);
-fetch('/api/users').then(r=>{if(!r.ok)throw Error('Unable to load users');return r.json();}).then(data=>{users=data;render();}).catch(()=>{list.textContent='Unable to load users';});
-</script>
-</body></html>
+const search=document.querySelector('#search'),list=document.querySelector('#users');
+const form=document.querySelector('#user-form'),message=document.querySelector('#message');
+const nameInput=document.querySelector('#name'),emailInput=document.querySelector('#email');
+const save=document.querySelector('#save'),cancel=document.querySelector('#cancel');
+let users=[],editingId=null;
+async function request(path,options={}){
+ const response=await fetch(path,options);
+ if(!response.ok){const data=await response.json().catch(()=>({}));throw Error(data.detail||data.message||'Request failed ('+response.status+')');}
+ return response.status===204?null:response.json();
+}
+function resetForm(){form.reset();editingId=null;save.textContent='Add user';cancel.hidden=true;}
+function render(){
+ list.replaceChildren();
+ for(const u of users.filter(u=>(u.name+' '+u.email).toLowerCase().includes(search.value.toLowerCase()))){
+  const li=document.createElement('li'),info=document.createElement('span'),actions=document.createElement('span');
+  info.textContent=u.name+' — '+u.email;actions.className='actions';
+  const edit=document.createElement('button');edit.textContent='Edit';edit.setAttribute('aria-label','Edit '+u.name);
+  edit.addEventListener('click',()=>{editingId=u.id;nameInput.value=u.name;emailInput.value=u.email;save.textContent='Save changes';cancel.hidden=false;nameInput.focus();});
+  const remove=document.createElement('button');remove.textContent='Delete';remove.setAttribute('aria-label','Delete '+u.name);
+  remove.addEventListener('click',async()=>{if(!confirm('Delete '+u.name+'?'))return;try{await request('/api/users/'+u.id,{method:'DELETE'});await load();message.textContent='User deleted';if(editingId===u.id)resetForm();}catch(e){message.textContent=e.message;}});
+  actions.append(edit,remove);li.append(info,actions);list.append(li);
+ }
+}
+async function load(){users=await request('/api/users');render();}
+search.addEventListener('input',render);cancel.addEventListener('click',resetForm);
+form.addEventListener('submit',async e=>{
+ e.preventDefault();message.textContent='';
+ const wasEditing=editingId!==null;
+ try{await request('/api/users'+(wasEditing?'/'+editingId:''),{method:wasEditing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nameInput.value,email:emailInput.value})});
+ resetForm();await load();message.textContent=wasEditing?'User updated':'User created';
+ }catch(error){message.textContent=error.message;}
+});
+load().catch(e=>{message.textContent=e.message;});
+</script></body></html>
