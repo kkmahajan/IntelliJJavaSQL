@@ -33,7 +33,7 @@ class WireMockExternalApiTest {
         server.verify(1, getRequestedFor(urlEqualTo("/external/status")));
     }
 
-    @Test void serverError() {
+    @Test void handlesServerError() {
         server.stubFor(get(urlEqualTo("/external/status")).willReturn(serverError()));
         IOException exception = assertThrows(IOException.class,
                 () -> client(Duration.ofSeconds(3)).fetchStatus());
