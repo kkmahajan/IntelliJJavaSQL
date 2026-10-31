@@ -2,12 +2,14 @@ package org.example.automation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import java.time.Duration;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+@ExtendWith(UiFailureCapture.class)
 abstract class UiTestSupport {
     protected WebDriver driver;
     protected UserManagerPage page;
