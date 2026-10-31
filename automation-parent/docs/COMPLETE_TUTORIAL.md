@@ -1,6 +1,6 @@
 # Complete tutorial: Java multi-module test automation framework
 
-> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–5. It is not a generic framework template. Follow the paths and commands from this repository. Last verified CI: [successful GitHub Actions run 41223588652](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41223588652) (26 executed tests across separate stages, no failures).
+> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–7 (including dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
 >
 > **Branch safety:** Development is on `feature/multi-module-test-framework`. The CI workflow is limited to this branch; do not assume it runs on `master`.
 
@@ -411,7 +411,7 @@ A practical development workflow:
 6. Add a focused Selenium or Playwright scenario for a user-visible workflow, using unique test data and cleanup.
 7. Run offline tests, start the app, run integration/browser suites, then push to the **feature branch** and inspect GitHub Actions.
 
-Suggested future learning exercises (not yet implemented): Playwright Page Objects, test tags, environment profiles, Allure reporting, accessibility checks, Testcontainers with a real database, retry policies, and CI test-result summaries.
+Suggested future learning exercises (not yet implemented): Playwright Page Objects, test tags, environment profiles, accessibility checks, Testcontainers with a real database, retry policies, and CI test-result summaries.
 
 ## 14. Test inventory and limitations
 
@@ -428,4 +428,131 @@ Suggested future learning exercises (not yet implemented): Playwright Page Objec
 
 The verified CI baseline is **26 unique tests passing across stages**, not a guarantee that every future run passes. The framework deliberately uses an in-memory application and local mock service; it is designed for learning and automation patterns, not production load, persistence, authentication, or transaction guarantees. UI tests mutate application state, so use only a disposable local test instance.
 
-**Next reading:** Return to [README](../README.md) for a compact quick start, then inspect the Java classes linked by the paths above while running the matching test suite.
+**Next reading:** Continue to [Phase 6–7: dual reports and Pages hosting](#15-phase-6-allure-and-extent-reports), or return to [README](../README.md) for a compact quick start, then inspect the Java classes linked by the paths above while running the matching test suite.
+
+## 15. Phase 6: Allure and Extent reports
+
+**Implemented and verified:** [CI run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) successfully ran the report-generation, feature-branch publication, and artifact-upload steps. Allure and Extent are generated together for the same workflow run.
+
+### What changed in the code?
+
+- Each test module (`sample-app`, `api-tests`, `ui-tests`) has the `io.qameta.allure:allure-junit5:2.29.1` test dependency and `src/test/resources/allure.properties` pointing to `target/allure-results`. The adapter records JUnit 5 test events as Allure results.
+- The parent `pom.xml` includes the fourth Maven module, `reporting-tools`. This is a **report-generation utility**, not another test suite.
+- `reporting-tools/src/main/java/org/example/automation/reporting/ExtentReportGenerator.java` uses **ExtentReports 5.1.2** and its `ExtentSparkReporter` to generate an HTML report from `TEST-*.xml` files produced by Maven Surefire.
+- The CI workflow combines Allure result files from offline, API, Selenium, and Playwright stages in `target/combined-allure-results/`, then uses the Allure CLI to generate HTML at `reports/latest/allure/`.
+- The same CI job generates Extent at `reports/latest/extent/index.html` and creates a simple `reports/latest/index.html` linking both reports.
+- The reports are uploaded as a GitHub Actions artifact and committed under `automation-parent/reports/latest/` on the **feature branch**, with `[skip ci]` in the generated commit message.
+
+### Reporting pipeline
+
+```text
+JUnit 5 test execution
+  ├── allure-junit5 adapter ──> module/target/allure-results/
+  │                                 └── combined results ──> Allure CLI ──> allure/index.html
+  └── Maven Surefire ────────> module/target/surefire-reports/TEST-*.xml
+                                    └── ExtentReportGenerator ──> extent/index.html
+                                                 |
+                                  reports/latest/index.html
+                                                 |
+                              GitHub artifact + feature-branch commit
+```
+
+**Why two reports?** Allure provides a JUnit-oriented results model with suites, trends, and detailed execution views. Extent Spark provides a separate HTML dashboard derived from Surefire XML. Both describe the same CI execution, but their internal representations and features differ.
+
+**Important aggregation detail:** Maven tests are invoked more than once across CI stages. The Extent generator reads the Surefire XML files available at report-generation time; repeated runs of a class may overwrite earlier Surefire XML files. The Allure collection is copied between stages so earlier test results are preserved. Do not claim the two tools necessarily have identical raw record counts without checking the generated reports.
+
+### Commands and files to inspect
+
+```powershell
+# Run from automation-parent after the tests have generated Surefire XML.
+mvn -pl reporting-tools compile exec:java "-Dexec.mainClass=org.example.automation.reporting.ExtentReportGenerator" "-Dexec.args=. reports/latest/extent/index.html"
+
+# In CI, Allure HTML is generated from the combined result directory:
+# target/report-cli/node_modules/.bin/allure generate target/combined-allure-results --clean -o reports/latest/allure
+```
+
+To view the generated reports in GitHub source control, inspect `reports/latest/allure/index.html` and `reports/latest/extent/index.html`. GitHub's file viewer is **not** an HTML hosting service, so opening the repository HTML file normally shows its source rather than an interactive report.
+
+### Troubleshooting
+
+| Symptom | Likely cause / check |
+| --- | --- |
+| Allure report is empty | Verify the test module has `allure-junit5` and nonempty `target/allure-results/`; check CI collection steps |
+| Extent has no executed tests | Verify `TEST-*.xml` exists in the module's `target/surefire-reports/` and tests were not all skipped |
+| Only some UI results appear | Selenium and Playwright run separately; inspect the Allure collection steps and the Surefire XML overwrite behavior |
+| HTML works locally but not in GitHub's code viewer | Use GitHub Pages rather than the repository's source viewer |
+| Generated report commit triggers more CI runs | Confirm the bot commit uses `[skip ci]` and review the workflow trigger/path filters |
+
+## 16. Phase 7: Publish both HTML reports using GitHub Pages
+
+**Implemented in workflow:** `.github/workflows/automation-framework-ci.yml` now includes GitHub Pages deployment steps. **Deployment verification is separate:** enabling Pages in repository settings and observing a successful `Deploy HTML reports to GitHub Pages` step are required before claiming the URLs are live.
+
+### Why GitHub Pages?
+
+A report committed to GitHub is stored as a file, not served as a website. GitHub Pages hosts the generated HTML, JavaScript, CSS, and JSON assets so you can open interactive Allure and Extent reports directly in a browser without downloading artifacts.
+
+### Repository settings
+
+1. Open [Settings → Pages](https://github.com/kkmahajan/IntelliJJavaSQL/settings/pages).
+2. Under **Build and deployment**, select **Source: GitHub Actions**.
+3. Ensure Actions are enabled and that the workflow is allowed to deploy Pages. The workflow requests `pages: write` and `id-token: write`, plus `contents: write` for the existing report commit.
+4. Push a change to `automation-parent/**` or the workflow on `feature/multi-module-test-framework`, or manually run the workflow.
+5. In [Actions](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml), verify the steps **Configure GitHub Pages**, **Upload HTML reports as Pages artifact**, and **Deploy HTML reports to GitHub Pages** succeed.
+6. Visit **Settings → Pages** to confirm the live site address.
+
+### How the workflow deploys the files
+
+The report generation step creates `reports/latest/.nojekyll`, which prevents Jekyll processing of report assets. The workflow uses:
+
+```yaml
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# After generating both reports:
+- name: Configure GitHub Pages
+  if: success() && steps.reports.outcome == 'success'
+  uses: actions/configure-pages@v5
+
+- name: Upload HTML reports as Pages artifact
+  if: success() && steps.reports.outcome == 'success'
+  uses: actions/upload-pages-artifact@v3
+  with:
+    path: automation-parent/reports/latest
+
+- name: Deploy HTML reports to GitHub Pages
+  if: success() && steps.reports.outcome == 'success'
+  id: pages
+  uses: actions/deploy-pages@v4
+```
+
+The directory `automation-parent/reports/latest/` becomes the **root** of the Pages website. The expected URLs are:
+
+| Page | Expected URL after successful deployment |
+| --- | --- |
+| Report dashboard | https://kkmahajan.github.io/IntelliJJavaSQL/ |
+| Allure | https://kkmahajan.github.io/IntelliJJavaSQL/allure/ |
+| Extent | https://kkmahajan.github.io/IntelliJJavaSQL/extent/ |
+
+These are **expected**, not proof that deployment has completed. If GitHub Pages is configured with a custom domain or the deployment fails, the actual behavior will differ.
+
+### CI flow after Phase 7
+
+```text
+Feature-branch push or manual dispatch
+  -> Java build and offline tests
+  -> Start Spring Boot and verify readiness
+  -> API + Selenium + Playwright tests
+  -> Generate Allure + Extent HTML
+  -> Commit generated reports to feature branch [skip ci]
+  -> Configure Pages -> Upload Pages artifact -> Deploy Pages
+  -> Upload test logs and report artifacts
+```
+
+### Security and operational considerations
+
+- GitHub Pages sites are generally **publicly viewable**. Never include secrets, tokens, personal data, or confidential test payloads in test names, logs, attachments, or screenshots.
+- Pages is a repository-level site, not a separate private site for the feature branch. The workflow publishes from the feature branch but does **not** merge into or change `master`.
+- The current pipeline commits generated report assets into source control **and** deploys them to Pages. This is intentional for the requested implementation, but generated HTML can make repository history large over time.
+- If Pages deployment fails, check the GitHub Actions job and repository Pages settings before changing Java tests. The report-generation and Pages-deployment stages are distinct.
