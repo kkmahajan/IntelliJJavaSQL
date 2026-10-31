@@ -1,6 +1,6 @@
 # Java Multi-Module Test Automation Framework
 
-A working local Java test automation project covering **JUnit 5, Mockito, REST Assured, JSON Schema, WireMock, Selenium Page Object Model, Playwright Java, and GitHub Actions CI**. The framework is developed in `feature/multi-module-test-framework` and isolated under `automation-parent/`; it does not replace the repository root Maven project.
+A working local Java test automation project covering **JUnit 5, Mockito, REST Assured, JSON Schema, WireMock, Selenium Page Object Model, Playwright Java, GitHub Actions CI, Allure and Extent reporting**. The framework is developed in `feature/multi-module-test-framework` and isolated under `automation-parent/`; it does not replace the repository root Maven project.
 
 **Start here:** [Complete step-by-step tutorial](docs/COMPLETE_TUTORIAL.md) — architecture, every test layer, code walkthroughs, setup, CI, debugging, and exercises.
 
@@ -14,6 +14,8 @@ automation-parent/                  Maven reactor (Java 21)
 │   └── UserController → UserService → UserRepository → InMemoryUserRepository
 ├── api-tests/                      REST Assured, JSON Schema, WireMock
 ├── ui-tests/                       Selenium POM, Playwright Java
+├── reporting-tools/                 Extent Spark HTML generator
+├── reports/latest/                 Generated Allure + Extent reports (after CI)
 ├── docs/COMPLETE_TUTORIAL.md       Detailed learning guide
 └── README.md                       This quick start
 
@@ -113,6 +115,31 @@ The workflow uses **Ubuntu 24.04 + Java 21**, runs offline tests, starts the Spr
 - Failure screenshots: `ui-tests/target/failure-artifacts/`.
 - CI artifact: `automation-framework-reports-<run number>` (14-day retention), including Surefire reports and application log.
 - Historical successful CI baseline: [run #41223588652](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41223588652).
+
+## Allure + Extent reports (Phase 6)
+
+The same CI workflow generates **both report formats** from all test modules and publishes them together to `automation-parent/reports/latest/` on `feature/multi-module-test-framework`, in a bot commit marked `[skip ci]` to avoid recursive builds.
+
+- [Report landing page](reports/latest/index.html) (available after the reporting-enabled CI run succeeds)
+- [Allure HTML report](reports/latest/allure/index.html) — powered by `allure-junit5` adapters in every test module.
+- [Extent Spark HTML report](reports/latest/extent/index.html) — built by `reporting-tools` from Surefire XML for every module.
+- Both reports are also uploaded as GitHub Actions artifacts; `target/combined-allure-results/` contains combined raw Allure results.
+- GitHub's normal source-code viewer may display HTML as source rather than execute it. To browse the interactive reports, download the CI artifact and open the HTML locally. Hosting via GitHub Pages requires a separate Pages configuration.
+- The published reports are generated artifacts, not source files. Avoid manual edits.
+
+**Generate Extent locally** after running the tests:
+
+```powershell
+mvn -pl reporting-tools compile exec:java "-Dexec.mainClass=org.example.automation.reporting.ExtentReportGenerator" "-Dexec.args=. reports/latest/extent/index.html"
+```
+
+**Generate Allure locally** after running tests and installing the Allure CLI:
+
+```powershell
+allure generate sample-app/target/allure-results api-tests/target/allure-results ui-tests/target/allure-results --clean -o reports/latest/allure
+```
+
+Local results may contain skipped or repeated executions if suites are run multiple times; the CI workflow collects its Allure results by stage.
 
 ## Learning path
 
