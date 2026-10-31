@@ -3,6 +3,8 @@ package org.example.automation;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -15,6 +17,7 @@ final class ServiceDeskTicketPage {
     ServiceDeskTicketPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait.ignoring(StaleElementReferenceException.class).ignoring(NoSuchElementException.class);
     }
     private void type(String id, String value) {
         WebElement input = driver.findElement(By.id(id));
@@ -36,14 +39,18 @@ final class ServiceDeskTicketPage {
     }
     void startWork(String title) {
         ticket(title).findElement(By.xpath(".//button[starts-with(@aria-label,'Start work ticket ')]")).click();
-        wait.until(d -> ticket(title).getText().contains("IN PROGRESS"));
+        wait.until(d -> cardTextContains(title, "IN PROGRESS"));
     }
     void resolve(String title) {
         ticket(title).findElement(By.xpath(".//button[starts-with(@aria-label,'Resolve ticket ')]")).click();
-        wait.until(d -> ticket(title).getText().contains("RESOLVED"));
+        wait.until(d -> cardTextContains(title, "RESOLVED"));
     }
     void filterPriority(String priority) {
         new Select(driver.findElement(By.id("ticket-priority-filter"))).selectByValue(priority);
+    }
+    private boolean cardTextContains(String title, String expected) {
+        return driver.findElements(By.cssSelector(".ticket-card")).stream()
+                .anyMatch(card -> { String text = card.getText(); return text.contains(title) && text.contains(expected); });
     }
     boolean visible(String title) {
         return driver.findElements(By.cssSelector(".ticket-card")).stream().anyMatch(e -> e.getText().contains(title));
