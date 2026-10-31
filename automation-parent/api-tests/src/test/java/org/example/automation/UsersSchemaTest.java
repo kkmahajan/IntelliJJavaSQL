@@ -12,6 +12,7 @@ class UsersSchemaTest {
     @BeforeEach void configure() {
         assumeTrue(Boolean.getBoolean("integration.tests"), "Start the sample app and use -Dintegration.tests=true");
         baseUrl = System.getProperty("app.baseUrl", "http://localhost:8080");
+        io.restassured.RestAssured.replaceFiltersWith(new ApiExecutionFilter());
     }
 
     @Test void individualUserMatchesContract() {
