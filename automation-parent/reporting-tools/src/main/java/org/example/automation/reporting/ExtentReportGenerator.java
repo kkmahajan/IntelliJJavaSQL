@@ -39,6 +39,11 @@ public final class ExtentReportGenerator {
             if (status.equals("skipped")) continue;
             String name = result.path("fullName").asText(result.path("name").asText("Unnamed test"));
             ExtentTest test = report.createTest(name);
+            String category = category(result, name);
+            test.assignCategory(category);
+            if (category.equals("Selenium") || category.equals("Playwright")) test.assignCategory("UI");
+            else if (category.equals("API")) test.assignCategory("API");
+            else test.assignCategory("Unit");
             for (JsonNode label : result.path("labels")) {
                 if (label.path("name").asText().equals("suite") || label.path("name").asText().equals("feature"))
                     test.assignCategory(label.path("value").asText());
@@ -60,6 +65,22 @@ public final class ExtentReportGenerator {
         report.flush();
         System.out.println("Extent report: " + output + " | executed=" + count + " failed=" + failed);
         if (count == 0) throw new IllegalStateException("No executed Allure result JSON files found");
+    }
+
+    /** Stable category mapping shared by report navigation and Cucumber/Allure. */
+    private static String category(JsonNode result, String name) {
+        for (JsonNode label : result.path("labels")) {
+            if (label.path("name").asText().equals("tag")) {
+                String tag = label.path("value").asText().replace("@", "").toLowerCase(Locale.ROOT);
+                if (tag.equals("playwright")) return "Playwright";
+                if (tag.equals("selenium")) return "Selenium";
+            }
+        }
+        String id = name.toLowerCase(Locale.ROOT);
+        if (id.contains("playwright") || id.contains("cucumber") || id.contains("user management through")) return "Playwright";
+        if (id.contains("uitest") || id.contains("uitests") || id.contains("servicedeskuitest")) return "Selenium";
+        if (id.contains("apitest") || id.contains("schematest") || id.contains("wiremock")) return "API";
+        return "Unit";
     }
 
     private static void addStep(ExtentTest parent, JsonNode step, Path results, Path assets) {
