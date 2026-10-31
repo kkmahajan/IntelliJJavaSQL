@@ -42,7 +42,7 @@ jobs:
           cache-dependency-path: automation-parent/**/pom.xml
 
       - name: Compile and run offline tests
-        run: mvn -B -ntp clean test
+        run: mvn -B -ntp clean test '-Dcucumber.filter.tags=@offline'
 
       - name: Package sample app
         run: mvn -B -ntp -pl sample-app -am package -DskipTests
@@ -91,7 +91,7 @@ jobs:
           chrome-version: stable
 
       - name: Run Selenium UI tests
-        run: mvn -B -ntp -pl ui-tests test -Dui.tests=true -Dapp.baseUrl=$APP_BASE_URL
+        run: mvn -B -ntp -pl ui-tests test -Dui.tests=true -Dapp.baseUrl=$APP_BASE_URL '-Dcucumber.filter.tags=@offline'
 
       - name: Collect Selenium Allure results
         if: always()
@@ -106,13 +106,14 @@ jobs:
           java -cp "$(cat ui-tests/target/playwright-classpath.txt)" com.microsoft.playwright.CLI install --with-deps chromium
 
       - name: Run Playwright UI tests
-        run: mvn -B -ntp -pl ui-tests test -Dplaywright.tests=true -Dapp.baseUrl=$APP_BASE_URL
+        run: mvn -B -ntp -pl ui-tests test -Dplaywright.tests=true -Dapp.baseUrl=$APP_BASE_URL '-Dcucumber.filter.tags=@playwright'
 
       - name: Collect Playwright Allure results
         if: always()
         run: |
           mkdir -p target/combined-allure-results
           cp ui-tests/target/allure-results/* target/combined-allure-results/ 2>/dev/null || true
+          cp ui-tests/target/cucumber-report.json target/cucumber-report.json 2>/dev/null || true
 
       - name: Generate Allure and Extent HTML reports
         id: reports
@@ -166,6 +167,7 @@ jobs:
             automation-parent/ui-tests/target/failure-artifacts/**
             automation-parent/sample-app.log
             automation-parent/target/combined-allure-results/**
+            automation-parent/target/cucumber-report.json
             automation-parent/reports/latest/**
           if-no-files-found: warn
           retention-days: 14
