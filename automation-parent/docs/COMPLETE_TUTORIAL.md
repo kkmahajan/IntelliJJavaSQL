@@ -1,10 +1,12 @@
 # Complete tutorial: Java multi-module test automation framework
 
-> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–7 (including dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
+> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–8 (including the Service Desk application, dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
 >
 > **Branch safety:** Development is on `feature/multi-module-test-framework`. The CI workflow is limited to this branch; do not assume it runs on `master`.
 
 ## Contents
+
+17. [Phase 8: Service Desk business workflow and scalable testing](#17-phase-8-service-desk-business-workflow-and-scalable-testing)
 
 1. [What we built and why](#1-what-we-built-and-why)
 2. [Prerequisites and first run](#2-prerequisites-and-first-run)
@@ -556,3 +558,139 @@ Feature-branch push or manual dispatch
 - Pages is a repository-level site, not a separate private site for the feature branch. The workflow publishes from the feature branch but does **not** merge into or change `master`.
 - The current pipeline commits generated report assets into source control **and** deploys them to Pages. This is intentional for the requested implementation, but generated HTML can make repository history large over time.
 - If Pages deployment fails, check the GitHub Actions job and repository Pages settings before changing Java tests. The report-generation and Pages-deployment stages are distinct.
+
+## 17. Phase 8: Service Desk business workflow and scalable testing
+
+### 17.1 Business purpose and user journey
+
+The application has grown from a generic user directory into a **Service Desk** demo for a small support team. Its purpose is to model a real sequence of customer-support activities that can be tested at the unit, API, and browser layers.
+
+**Example scenario:** A customer cannot complete checkout. A support representative creates a ticket with the title "Checkout fails", records a description, sets priority to HIGH, and assigns the ticket to John Watson. When an agent starts investigating, the status changes from OPEN to IN_PROGRESS. Once the issue is fixed, the agent marks the ticket RESOLVED. A supervisor filters the board by HIGH priority and OPEN status to identify urgent unstarted work.
+
+The UI at `http://localhost:8080` has two sections:
+
+- **Team members:** The original user directory is preserved, with create/search/edit/delete. A seeded John Watson (user ID 1) is available as an assignee.
+- **Support tickets:** A form accepts title, description, priority and assignee. Ticket cards show the issue number, description, priority, current status, and assignee. Users can edit, delete, start work, resolve, and filter by status or priority.
+
+The interface uses accessible labels, status announcements and semantic ticket cards. JavaScript calls the same REST API that REST Assured tests exercise, making the UI and API paths consistent.
+
+### 17.2 Domain model and business rules
+
+`TicketController.Ticket` is a Java record with six fields:
+
+| Field | Type | Rule |
+| --- | --- | --- |
+| `id` | int | Server-generated, monotonically increasing |
+| `title` | String | Required, trimmed, 1–120 characters |
+| `description` | String | Optional, trimmed, maximum 2,000 characters |
+| `priority` | String | LOW, MEDIUM, HIGH (case-insensitive input) |
+| `status` | String | OPEN, IN_PROGRESS, RESOLVED |
+| `assigneeId` | Integer | Optional; if supplied, must identify an existing user |
+
+**State machine:**
+
+```text
+Ticket created
+      |
+      v
+    OPEN  -- Start work --> IN_PROGRESS -- Resolve --> RESOLVED
+      |                         |                       |
+      +--- same status ---------+---- same status ------+
+```
+
+Backward moves or skipping directly from OPEN to RESOLVED return **409 Conflict**. Invalid status values return **400 Bad Request**. Missing ticket IDs return **404 Not Found**. Updating ticket details preserves the current workflow status.
+
+This is deliberately a small state machine. The app does **not** implement authentication, authorization, SLAs, comments, attachments, history, email notifications, or persistent storage.
+
+### 17.3 Layered implementation
+
+```text
+Browser (static/index.html) or REST Assured client
+                   |
+          TicketController
+      HTTP routes + request records
+                   |
+             TicketService
+      validation, filtering, transitions
+                   |
+             TicketRepository
+       ConcurrentHashMap + ID counter
+                   |
+            in-memory tickets
+
+TicketService --> UserRepository (assignee validation)
+```
+
+New files:
+
+- `sample-app/src/main/java/org/example/automation/TicketController.java`: REST endpoints, request/response records and status patching.
+- `sample-app/src/main/java/org/example/automation/TicketService.java`: business validation, status transitions and filtering.
+- `sample-app/src/main/java/org/example/automation/TicketRepository.java`: in-memory persistence abstraction with sorted listings and ID generation.
+- `sample-app/src/main/resources/static/index.html`: original user management UI plus the support ticket board.
+
+**Why separate layers?** A new persistence backend can be introduced without rewriting controller routes; business rules can be unit-tested without a server; the same API can support multiple frontends. The repository currently uses a concrete `TicketRepository` class and an in-memory map—this is a learning-scale architecture, not a production transaction model.
+
+### 17.4 API specification
+
+| HTTP | Endpoint | Success | Important errors |
+| --- | --- | --- | --- |
+| GET | `/api/tickets` | 200, JSON array; optional `status` and `priority` filters | 400 for invalid filter |
+| GET | `/api/tickets/{id}` | 200, JSON object | 404 |
+| POST | `/api/tickets` | 201, created ticket and Location header | 400 |
+| PUT | `/api/tickets/{id}` | 200, edited ticket; status unchanged | 400, 404 |
+| PATCH | `/api/tickets/{id}/status` | 200, ticket with updated status | 400, 404, 409 |
+| DELETE | `/api/tickets/{id}` | 204, no content | 404 |
+
+**Example PowerShell request** (after starting the Spring Boot application):
+
+```powershell
+$body = @{ title="Checkout fails"; description="Customer cannot pay"; priority="HIGH"; assigneeId=1 } | ConvertTo-Json
+$ticket = Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/tickets -ContentType "application/json" -Body $body
+$ticket
+Invoke-RestMethod -Method Patch -Uri "http://localhost:8080/api/tickets/$($ticket.id)/status" -ContentType "application/json" -Body '{"status":"IN_PROGRESS"}'
+Invoke-RestMethod -Method Patch -Uri "http://localhost:8080/api/tickets/$($ticket.id)/status" -ContentType "application/json" -Body '{"status":"RESOLVED"}'
+Invoke-RestMethod -Method Delete -Uri "http://localhost:8080/api/tickets/$($ticket.id)"
+```
+
+To filter the queue:
+
+```powershell
+Invoke-RestMethod "http://localhost:8080/api/tickets?status=OPEN&priority=HIGH"
+```
+
+### 17.5 Expanded automated tests
+
+The original 26 unique tests remain in the framework. New suites add:
+
+- `sample-app/src/test/java/org/example/automation/TicketServiceTest.java`: Mockito unit tests for creation, normalization, optional fields, invalid titles and priorities, unknown assignees, invalid filters, filtered results, valid/invalid state transitions, status preservation, missing tickets and deletion. Parameterized cases expand the test count automatically.
+- `api-tests/src/test/java/org/example/automation/TicketsApiTest.java`: REST Assured tests for create/read/delete, full status progression, forbidden transitions, update, filtering, bad assignees, invalid payloads, invalid filters and missing records.
+- `ui-tests/src/test/java/org/example/automation/ServiceDeskUiTest.java`: Selenium scenarios for ticket creation, assignment, progression to RESOLVED, priority filtering and cleanup.
+
+**Run locally:**
+
+```powershell
+cd automation-parent
+mvn clean test                       # Offline unit and WireMock tests
+mvn -pl sample-app spring-boot:run   # Keep running in terminal 1
+
+# Terminal 2, in automation-parent:
+mvn -pl api-tests test "-Dintegration.tests=true"
+mvn -pl ui-tests test "-Dui.tests=true"
+```
+
+JUnit 5 discovers new `*Test` classes without editing a central test suite. The existing Allure JUnit 5 adapters automatically capture new tests, and the Extent generator discovers their Surefire XML results. CI continues to run the module-specific test stages.
+
+### 17.6 How to add a new business feature and tests
+
+1. **Define a user story and acceptance criteria.** Example: "As a supervisor, I want to filter open high-priority tickets so I can prioritize urgent work."
+2. **Define the API contract** (route, request, response, errors). Keep backward compatibility where practical.
+3. **Implement business rules in the service** and data access in the repository, not in the controller.
+4. **Add unit tests** for positive, boundary, negative and state-transition behavior.
+5. **Add REST Assured tests** against the running app, with unique test data and cleanup.
+6. **Add UI automation** for the user-visible journey using stable element IDs, accessibility labels, explicit waits and cleanup. For a larger framework, extract ticket interactions into a dedicated Page Object as a next refactor.
+7. **Run all suites** locally and in CI. Review Allure and Extent reports, not just the workflow's green status.
+8. **Update documentation** with new business rules, API routes and test scenarios.
+
+### 17.7 Scalability boundaries
+
+The modular Maven reactor, independent test layers, and automatic report discovery support **adding more tests with limited configuration changes**. They do not imply unlimited load scalability. The current in-memory store resets at startup and does not provide database transactions, authentication, authorization, event history, or cross-process persistence. For a production-grade next phase, consider a database with Testcontainers, role-based access control, service contracts, test fixtures, and a dedicated ticket Page Object.
