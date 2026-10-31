@@ -2,8 +2,8 @@
 
 > **Project:** Java Multi-Module Test Automation Framework  
 > **Repository:** [IntelliJJavaSQL — feature/multi-module-test-framework](https://github.com/kkmahajan/IntelliJJavaSQL/tree/feature/multi-module-test-framework/automation-parent)  
-> **Stack:** Java 21, Maven, JUnit 5, Mockito, REST Assured, WireMock, JSON Schema, Selenium WebDriver, Playwright Java, Spring Boot, GitHub Actions  
-> **Verified CI baseline:** [Successful run #41223588652](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41223588652) — 26 unique automated tests passed across separate stages, zero failures.
+> **Stack:** Java 21, Maven, JUnit 5, Mockito, REST Assured, WireMock, JSON Schema, Selenium WebDriver, Playwright Java, Spring Boot, GitHub Actions, Allure, ExtentReports, GitHub Pages  
+> **Verified CI baseline:** [Successful run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) — tests and dual-report generation/publication succeeded. GitHub Pages deployment was added later; verify its own CI step before claiming the live URLs work.
 
 This document is intended for **interview preparation, project explanation, and resume writing**. For the full implementation walkthrough, see [COMPLETE_TUTORIAL.md](COMPLETE_TUTORIAL.md).
 
@@ -19,7 +19,7 @@ This document is intended for **interview preparation, project explanation, and 
 >
 > For UI automation, I implemented Selenium WebDriver using the Page Object Model with reusable methods, explicit waits, and automated browser management. I also added Playwright Java to automate end-to-end CRUD workflows.
 >
-> Finally, I integrated the framework with GitHub Actions to automatically execute tests on a clean environment, start the application, run API and browser tests, and publish test reports and failure screenshots.
+> Finally, I integrated GitHub Actions to execute the suites on a clean environment, start the application, and generate **both Allure and Extent HTML reports** in the same run. I also configured GitHub Pages deployment so these reports can be hosted as web pages without downloading artifacts.
 >
 > The framework has 26 unique automated tests, all successfully verified in a GitHub Actions CI run.
 
@@ -70,6 +70,8 @@ This document is intended for **interview preparation, project explanation, and 
 | Test data | UUID-based unique users and cleanup | Reduced collisions between runs |
 | GitHub Actions | Java setup, app readiness, API/UI stages, artifacts | Repeatable automated validation |
 | Diagnostics | Surefire XML/text reports and failure screenshots | Faster debugging of CI failures |
+| Dual reporting | Allure JUnit 5 adapter plus Extent Spark generated from Surefire XML | Two complementary HTML views of the same CI execution |
+| Report publication | GitHub Actions artifacts, feature-branch commit, and configured GitHub Pages deployment | Reports are retained and can be hosted in a browser |
 
 ### REST endpoints under test
 
@@ -139,11 +141,35 @@ An initial CI run failed while installing Playwright Chromium. The default hoste
 
 The application uses an in-memory store rather than a real database, and it does not include authentication or transactional concurrency guarantees. Future improvements could include Testcontainers with a database, Playwright Page Objects, test tagging, environment profiles, richer reporting such as Allure, and accessibility testing. I distinguish these ideas from features already delivered.
 
-### Q11. How are integration tests controlled?
+### Q11. How did you implement Allure reporting?
+
+I added the `allure-junit5` dependency and `allure.properties` to each test module. The JUnit 5 adapter writes raw result files during execution. Because API, Selenium, and Playwright suites run in separate CI stages, I collect their Allure result files into a shared directory, then generate a consolidated HTML report using the Allure CLI.
+
+### Q12. How did you implement Extent reporting for all modules?
+
+I created a separate Maven module named `reporting-tools` using ExtentReports and `ExtentSparkReporter`. Its Java entry point scans Surefire `TEST-*.xml` files from the three test modules, maps each test case to pass, fail, or skip, and produces a combined HTML report. It avoids coupling individual test classes to an Extent listener.
+
+### Q13. Why did you choose both Allure and Extent?
+
+Allure provides detailed JUnit-based test execution views, while Extent Spark provides a separate HTML summary from Surefire XML. Generating both in one CI job means the team can compare results from complementary perspectives without rerunning tests. I would clarify that the underlying raw record counts may differ if Surefire XML was overwritten by later stage invocations.
+
+### Q14. How did you publish the HTML reports for browser access?
+
+I configured the GitHub Actions workflow to generate both report directories, create a landing page, and upload `reports/latest/` as a GitHub Pages artifact using `actions/upload-pages-artifact` and `actions/deploy-pages`. GitHub Pages must also be enabled in repository settings with **Source: GitHub Actions**. The implementation is committed; I would verify a successful Pages deployment before claiming the public URLs are live.
+
+### Q15. What is the difference between GitHub Actions artifacts and GitHub Pages?
+
+Actions artifacts are downloadable build outputs with a retention period; they are useful for diagnostics and archiving. GitHub Pages serves static HTML and assets over HTTPS, letting users open interactive reports directly in a browser. Our workflow also commits generated HTML to the feature branch, but GitHub's code viewer is not equivalent to website hosting.
+
+### Q16. How do you handle sensitive information in published reports?
+
+I treat GitHub Pages as potentially public. I avoid including credentials, authorization headers, production data, customer identifiers, or secrets in test names, assertion messages, attachments, screenshots, and logs. Before enabling public reporting for a real system, I would audit the generated report contents and repository visibility.
+
+### Q17. How are integration tests controlled?
 
 JUnit `assumeTrue` checks system properties before running tests. REST Assured and schema tests use `-Dintegration.tests=true`, Selenium uses `-Dui.tests=true`, and Playwright uses `-Dplaywright.tests=true`. This allows a fast offline build while keeping integration and browser execution explicit.
 
-### Q12. How do you debug a failing pipeline?
+### Q18. How do you debug a failing pipeline?
 
 I open the GitHub Actions job and locate the first failing step. I inspect Surefire XML/text reports, app logs, and browser screenshots, then reproduce the relevant Maven module locally using the same flags. I separate setup/environment failures from application defects and assertion failures before making the smallest necessary change.
 
@@ -156,7 +182,8 @@ I open the GitHub Actions job and locate the first failing step. I inspect Suref
 - Implemented Mockito-based unit tests and WireMock-based HTTP simulations to validate business logic, server errors, malformed responses, and timeout handling.
 - Designed Selenium UI automation using the Page Object Model, reusable browser setup, explicit waits, and automated test data cleanup.
 - Implemented Playwright Java browser automation for end-to-end user management workflows.
-- Configured GitHub Actions CI to execute automated tests, start the Spring Boot application, provision browsers, and retain JUnit reports and failure screenshots.
+- Configured GitHub Actions CI to execute automated tests, start the Spring Boot application, provision browsers, and generate **Allure and Extent Spark HTML reports** in the same run.
+- Configured GitHub Pages deployment for browser-accessible test reports, alongside feature-branch publication and downloadable CI artifacts.
 - Successfully verified **26 unique automated tests with zero failures** in a GitHub Actions CI run.
 
 ## 7. How to present this project convincingly
@@ -169,10 +196,38 @@ Focus on the **engineering decisions**, not just a list of libraries:
 4. **CI ownership:** How does the pipeline start the app, provision browsers and collect evidence?
 5. **Debugging:** What did the Ubuntu/Playwright compatibility issue teach you?
 
-Be prepared to navigate to the actual Java files, explain at least one test from each layer, and run the matching Maven command. Avoid claiming that the project includes features such as a persistent database, authentication, Allure reporting, or Testcontainers—those have not been implemented.
+Be prepared to navigate to the actual Java files, explain at least one test from each layer, and run the matching Maven command. Avoid claiming that the project includes features such as a persistent database, authentication, or Testcontainers—those have not been implemented. Allure and Extent generation are verified; Pages deployment requires its own successful CI verification.
 
 ## 8. Further reading
 
 - [Complete implementation tutorial](COMPLETE_TUTORIAL.md)
 - [Project README](../README.md)
-- [Verified successful CI run](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41223588652)
+- [Verified successful dual-report CI run](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401)
+- [Report dashboard (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/)
+- [Allure (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
+- [Extent (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
+
+## 9. Reporting architecture: whiteboard explanation
+
+```text
+JUnit 5 test suites
+   |--> Allure adapter --> combined allure-results --> Allure HTML
+   |--> Surefire XML -------------------------------> Extent Spark HTML
+                                                      |
+                                         reports/latest/index.html
+                                                      |
+                                  GitHub Actions artifacts + feature commit
+                                                      |
+                                      GitHub Pages deployment (configured)
+```
+
+**Interview talking point:** Report generation and report hosting are different responsibilities. I verified dual-report generation and publication in [CI run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401). I then added GitHub Pages deployment, which needs a separate successful Pages job and repository configuration before its URLs are considered live.
+
+### Practical demo checklist
+
+1. Show `allure-junit5` in each module's `pom.xml` and `allure.properties`.
+2. Open `reporting-tools/src/main/java/org/example/automation/reporting/ExtentReportGenerator.java` and explain Surefire XML aggregation.
+3. Open `.github/workflows/automation-framework-ci.yml` and identify the Allure collection, Extent generation, artifact upload, and Pages deployment steps.
+4. Open the latest successful workflow run and show the reporting steps.
+5. If Pages has deployed successfully, demonstrate the dashboard and both reports in a browser.
+6. Explain why publicly hosted reports must not contain secrets or confidential test data.
