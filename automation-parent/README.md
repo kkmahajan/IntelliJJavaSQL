@@ -4,6 +4,8 @@ A working local Java test automation project covering **JUnit 5, Mockito, REST A
 
 **Start here:** [Complete step-by-step tutorial](docs/COMPLETE_TUTORIAL.md) — architecture, every test layer, code walkthroughs, setup, CI, debugging, and exercises.
 
+**Preparing for interviews?** [Interview preparation and resume summary](docs/INTERVIEW_PREPARATION.md) — a 60-second project introduction, architecture overview, contributions, 12 interview Q&As, verified test results, and resume-ready bullet points.
+
 ## Architecture
 
 ```text
