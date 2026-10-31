@@ -15,7 +15,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> user(@PathVariable int id) {
+    public Map<String, Object> user(@PathVariable("id") int id) {
         if (id != 1) {
             throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
