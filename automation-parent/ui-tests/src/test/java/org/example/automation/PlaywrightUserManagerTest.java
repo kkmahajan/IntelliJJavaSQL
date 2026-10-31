@@ -23,7 +23,7 @@ class PlaywrightUserManagerTest {
             try {
                 Page page = browser.newPage();
                 page.navigate(baseUrl);
-                page.getByText("John Watson").waitFor();
+                page.locator("#users").getByText("John Watson").waitFor();
                 page.locator("#name").fill(name);
                 page.locator("#email").fill(email);
                 page.locator("#save").click();
