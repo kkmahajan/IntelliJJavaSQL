@@ -29,6 +29,7 @@ A hands-on Java automation project built around a small **Service Desk** applica
 - [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
 - [Complete tutorial](docs/COMPLETE_TUTORIAL.md)
 - [Interview preparation](docs/INTERVIEW_PREPARATION.md)
+- [Java coding interview preparation](docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — ten core Java topics, problem-solving patterns, complexity, SDET applications and exercises.
 
 The published report links show the latest successfully deployed report. To inspect a particular historical run, open that run in GitHub Actions and download its report artifact.
 
