@@ -7,6 +7,8 @@
 
 This document is intended for **interview preparation, project explanation, and resume writing**. For the full implementation walkthrough, see [COMPLETE_TUTORIAL.md](COMPLETE_TUTORIAL.md).
 
+For algorithm and data-structure coding preparation, use [JAVA_CODING_INTERVIEW_PREPARATION.md](JAVA_CODING_INTERVIEW_PREPARATION.md). It covers ten core Java topics with code examples, complexity analysis, SDET applications, exercises and interview checkpoints.
+
 ## 1. 60-second interview introduction
 
 > I worked on building a Java-based, multi-module test automation framework that supports unit testing, API automation, UI automation, service mocking, and CI/CD integration.
