@@ -52,6 +52,8 @@ This repository also contains a standalone Java automation framework and Service
 
 **Java coding practice:** [10-topic Java interview preparation guide](automation-parent/docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — Strings/Arrays, HashMaps, Collections, Sets, Sorting, Two Pointers, Sliding Window, Stacks/Queues, Streams and Concurrency.
 
+**DSA and System Design roadmap:** [18-month learning plan](automation-parent/docs/DSA_AND_SYSTEM_DESIGN_ROADMAP.md) — DSA syllabus, system design exercises, IoT/AI architecture, 60-hour allocation and readiness tracker.
+
 - [Live test dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/)
 - [Allure report](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
 - [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
