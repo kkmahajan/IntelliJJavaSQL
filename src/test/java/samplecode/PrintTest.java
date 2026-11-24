@@ -1,19 +1,17 @@
 package samplecode;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class PrintTest {
 
     @Test
-    public void testPrintOnlyOnce() {
-        int[] a = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-        // Use Streams to remove duplicates and print unique integers
-        System.out.println("Unique integers:");
-        Arrays.stream(a)
-                .distinct() // Remove duplicates
-                .forEach(System.out::println); // Print each unique integer
+    public void shouldKeepOnlyDistinctValuesInEncounterOrder() {
+        int[] values = {1, 2, 3, 1, 2, 4, 5, 4};
+        List<Integer> distinct = Arrays.stream(values).distinct().boxed().toList();
+        Assert.assertEquals(distinct, List.of(1, 2, 3, 4, 5));
     }
 }

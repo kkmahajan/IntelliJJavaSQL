@@ -1,34 +1,25 @@
 package samplecode;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RemoveDuplicateWordsTest {
 
-    public static void findDuplicateWords(String str) {
-        String[] words = str.toLowerCase().split("\\s+");
-        //String[] words = str.split("\\s+"); // using toLowerCase() ignores the case of the strings
-        Map<String, Integer> wordCountMap = new HashMap<>();
-
-        for (String word : words) {
-            wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
-        }
-
-        System.out.println("Duplicate words in the given string:");
-        for (Map.Entry<String, Integer> entry : wordCountMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-            }
-        }
+    @Test
+    public void shouldCountDuplicateWordsCaseInsensitively() {
+        Map<String, Integer> duplicates = findDuplicateWords("Welcome Kaustubh welcome1 March32025 Welcome welcome");
+        Assert.assertEquals(duplicates, Map.of("welcome", 3));
     }
 
-    @Test
-    public void testFindDuplicateWords() {
-        String string = "Welcome Kaustubh welcome1 March32025 Welcome welcome";
-        findDuplicateWords(string);
-
-        System.out.println("Array split and added in one string : \n\n" + String.join(" ", string.split("\\s+")));
+    private Map<String, Integer> findDuplicateWords(String input) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (String word : input.toLowerCase().trim().split("\\s+")) {
+            counts.merge(word, 1, Integer::sum);
+        }
+        counts.entrySet().removeIf(entry -> entry.getValue() < 2);
+        return counts;
     }
 }

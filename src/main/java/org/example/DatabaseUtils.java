@@ -1,81 +1,111 @@
 package org.example;
 
-import java.sql.*;
-import java.util.*;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.example.TestData.*;
+import static org.example.TestData.SQL_DB_KEY;
+import static org.example.TestData.SQL_DB_URL;
+import static org.example.TestData.SQL_DB_USERNAME;
 
-public class DatabaseUtils {
+public class DatabaseUtils implements AutoCloseable {
 
-    static PropertiesFileSetup propertiesFileSetup = new PropertiesFileSetup();
-    static Properties prop = propertiesFileSetup.setProperties();
-    final Logger LOGGER = Logger.getLogger(DatabaseUtils.class.getName());
-    String dbUser = System.getenv(SQL_DB_USERNAME);
-    String dbKey = System.getenv(SQL_DB_KEY);
-    String connectionUrl = null;
-    Connection con;
-    Statement statement;
-    ResultSet resultSet;
+    private static final Logger LOGGER = Logger.getLogger(DatabaseUtils.class.getName());
+    private static final int CONNECTION_TIMEOUT_MS = 10_000;
+    private static final int QUERY_TIMEOUT_SECONDS = 5;
 
-    /**
-     * This method is used to execute query and provide the result in List<Map<String, Object>>
-     * Where List specifies the number of rows fetched in the ResultSet
-     * Map<String> specifies the columns fetched in the ResultSet</String>
-     * Map<Object> specifies the values fetched in the ResultSet</Object>
-     *
-     * @param query as String
-     * @return Query Result Set in List<Map<String, Object>>
-     */
-    public List<Map<String, Object>> executeQuery(String query) {
+    private final HikariDataSource dataSource;
 
-        DriverManager.setLoginTimeout(10);
-        System.out.println("Used Query : \n" + query);
-        List<Map<String, Object>> resultList = null;
-        try {
-            connectionUrl = prop.getProperty(sqlDbUrl);
-            con = DriverManager.getConnection(connectionUrl, dbUser, dbKey);
-            statement = con.createStatement();
-            resultSet = statement.executeQuery(query);
+    public DatabaseUtils() {
+        Properties properties = new PropertiesFileSetup().setProperties();
 
-            resultList = new ArrayList<>();
+        String jdbcUrl = requireValue(properties.getProperty(SQL_DB_URL), SQL_DB_URL);
+        String dbUser = requireEnvironmentVariable(SQL_DB_USERNAME);
+        String dbPassword = requireEnvironmentVariable(SQL_DB_KEY);
 
-            // Get the metadata of the ResultSet to retrieve column names
-            int columnCount = resultSet.getMetaData().getColumnCount();
-            List<String> columnNames = new ArrayList<>();
-            for (int i = 1; i <= columnCount; i++) {
-                columnNames.add(resultSet.getMetaData().getColumnName(i));
-            }
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
+        config.setConnectionTimeout(CONNECTION_TIMEOUT_MS);
+        config.setPoolName("intellij-java-sql-pool");
 
-            // Iterate over the ResultSet and populate the list
-            while (resultSet.next()) {
-                Map<String, Object> rowMap = new HashMap<>();
-                for (String columnName : columnNames) {
-                    rowMap.put(columnName, resultSet.getObject(columnName));
-                }
-                resultList.add(rowMap);
-            }
-            con.close();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "SQL Exception occurred", e);
-        }
-        return resultList;
+        this.dataSource = new HikariDataSource(config);
     }
 
-    /**
-     * This method takes input a query and replaces the placeholders in the query with the actual values passed
-     * as parameters in the Map<String, String>
-     *
-     * @param query    as String
-     * @param paramMap as Map<String, String>
-     * @return Query Result as List<Map<String, Object>>
-     */
-    public List<Map<String, Object>> getDBDataWithParams(String query, Map<String, String> paramMap) {
+    public List<Map<String, Object>> executeQuery(String query) {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
 
-        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-            query = query.replace(("&" + entry.getKey()), entry.getValue());
+            statement.setQueryTimeout(QUERY_TIMEOUT_SECONDS);
+            try (ResultSet resultSet = statement.executeQuery(query)) {
+                return toRows(resultSet);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Unable to execute database query", e);
+            throw new IllegalStateException("Database query failed", e);
         }
-        return executeQuery(query);
+    }
+
+    public List<Map<String, Object>> executePreparedQuery(String query, Object... parameters) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setQueryTimeout(QUERY_TIMEOUT_SECONDS);
+            for (int i = 0; i < parameters.length; i++) {
+                statement.setObject(i + 1, parameters[i]);
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return toRows(resultSet);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Unable to execute prepared database query", e);
+            throw new IllegalStateException("Database query failed", e);
+        }
+    }
+
+    private List<Map<String, Object>> toRows(ResultSet resultSet) throws SQLException {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        ResultSetMetaData metadata = resultSet.getMetaData();
+        int columnCount = metadata.getColumnCount();
+
+        while (resultSet.next()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            for (int i = 1; i <= columnCount; i++) {
+                row.put(metadata.getColumnLabel(i), resultSet.getObject(i));
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    private static String requireEnvironmentVariable(String name) {
+        return requireValue(System.getenv(name), name);
+    }
+
+    private static String requireValue(String value, String name) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException("Required configuration is missing: " + name);
+        }
+        return value;
+    }
+
+    @Override
+    public void close() {
+        dataSource.close();
     }
 }
