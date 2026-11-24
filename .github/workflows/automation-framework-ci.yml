@@ -2,7 +2,7 @@ name: Automation Framework CI
 
 on:
   push:
-    branches: [feature/multi-module-test-framework]
+    branches: [master]
     paths:
       - 'automation-parent/**'
       - '.github/workflows/automation-framework-ci.yml'
@@ -30,7 +30,7 @@ jobs:
       APP_BASE_URL: http://127.0.0.1:8080
 
     steps:
-      - name: Checkout feature branch
+      - name: Checkout master branch
         uses: actions/checkout@v4
 
       - name: Set up Java 21
@@ -126,7 +126,7 @@ jobs:
           touch reports/latest/.nojekyll
           python3 reporting-tools/build_dashboard.py target/combined-allure-results reports/latest/index.html
 
-      - name: Publish both reports to feature branch
+      - name: Publish both reports to master branch
         if: always() && steps.reports.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
@@ -136,7 +136,7 @@ jobs:
             echo "No report changes to publish"
           else
             git commit -m "docs(reports): publish Allure and Extent CI reports [skip ci]"
-            git push origin HEAD:feature/multi-module-test-framework
+            git push origin HEAD:master
           fi
 
       # GitHub Pages must be enabled with Source: GitHub Actions in Settings > Pages.
