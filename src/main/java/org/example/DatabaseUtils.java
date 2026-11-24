@@ -47,6 +47,7 @@ public class DatabaseUtils implements AutoCloseable {
         // This utility is intentionally read-only. Use a separate, least-privilege
         // write path if the application later needs INSERT/UPDATE/DELETE operations.
         config.setReadOnly(true);
+        config.addDataSourceProperty("readOnlyPropagatesToServer", "true");
         config.setAutoCommit(true);
         config.setConnectionTimeout(CONNECTION_TIMEOUT_MS);
         config.setValidationTimeout(VALIDATION_TIMEOUT_MS);
