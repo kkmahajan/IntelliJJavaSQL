@@ -2,8 +2,8 @@
 
 A hands-on Java automation project built around a small **Service Desk** application. It demonstrates how to structure and execute unit, API, browser UI, and BDD tests in a Maven multi-module repository, then publish detailed execution evidence through **Allure**, **Extent Spark**, and a searchable GitHub Pages dashboard.
 
-> **Current development branch:** `feature/multi-module-test-framework`  
-> All framework work and CI report publishing are scoped to this branch. The repository's `master` branch is not the target of this framework workflow.
+> **Automation framework branch:** `feature/multi-module-test-framework`  
+> Framework code and CI report publishing remain scoped to that branch. This branch adds a separate DSA/System Design learning guide; the repository's `master` branch is not the target.
 
 ## Project at a glance
 
@@ -30,6 +30,7 @@ A hands-on Java automation project built around a small **Service Desk** applica
 - [Complete tutorial](docs/COMPLETE_TUTORIAL.md)
 - [Interview preparation](docs/INTERVIEW_PREPARATION.md)
 - [Java coding interview preparation](docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — ten core Java topics, problem-solving patterns, complexity, SDET applications and exercises.
+- [DSA and System Design roadmap](docs/DSA_AND_SYSTEM_DESIGN_ROADMAP.md) — 15-topic DSA syllabus, test-platform designs, IoT/AI architecture, time budget and interview readiness criteria.
 
 The published report links show the latest successfully deployed report. To inspect a particular historical run, open that run in GitHub Actions and download its report artifact.
 
