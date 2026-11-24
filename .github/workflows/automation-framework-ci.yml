@@ -1,0 +1,172 @@
+name: Automation Framework CI
+
+on:
+  push:
+    branches: [feature/multi-module-test-framework]
+    paths:
+      - 'automation-parent/**'
+      - '.github/workflows/automation-framework-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: automation-framework-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Java 21 - API, Selenium and Playwright
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: automation-parent
+    env:
+      CI: 'true'
+      APP_BASE_URL: http://127.0.0.1:8080
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: automation-parent/**/pom.xml
+
+      - name: Compile and run offline tests
+        run: mvn -B -ntp clean test '-Dcucumber.filter.tags=@offline'
+
+      - name: Package sample app
+        run: mvn -B -ntp -pl sample-app -am package -DskipTests
+
+      - name: Start sample app
+        run: |
+          nohup mvn -B -ntp -pl sample-app spring-boot:run > sample-app.log 2>&1 &
+          echo $! > sample-app.pid
+
+      - name: Wait for app readiness
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8080/api/users/1 > /dev/null; then
+              echo "Sample app is ready"
+              exit 0
+            fi
+            if ! kill -0 "$(cat sample-app.pid)" 2>/dev/null; then
+              echo "Sample app process exited"
+              tail -100 sample-app.log
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "Timed out waiting for sample app"
+          tail -100 sample-app.log
+          exit 1
+
+      - name: Prepare combined Allure results
+        run: |
+          mkdir -p target/combined-allure-results
+          cp sample-app/target/allure-results/* target/combined-allure-results/ 2>/dev/null || true
+          rm -rf api-tests/target/allure-results ui-tests/target/allure-results
+
+      - name: Run API integration and schema tests
+        run: mvn -B -ntp -pl api-tests test -Dintegration.tests=true -Dapp.baseUrl=$APP_BASE_URL
+
+      - name: Collect API Allure results
+        if: always()
+        run: |
+          mkdir -p target/combined-allure-results
+          cp api-tests/target/allure-results/* target/combined-allure-results/ 2>/dev/null || true
+
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Run Selenium UI tests
+        run: mvn -B -ntp -pl ui-tests test -Dui.tests=true -Dapp.baseUrl=$APP_BASE_URL '-Dcucumber.filter.tags=@offline'
+
+      - name: Collect Selenium Allure results
+        if: always()
+        run: |
+          mkdir -p target/combined-allure-results
+          cp ui-tests/target/allure-results/* target/combined-allure-results/ 2>/dev/null || true
+          rm -rf ui-tests/target/allure-results
+
+      - name: Install Playwright Chromium
+        run: |
+          mvn -B -ntp -pl ui-tests dependency:build-classpath -Dmdep.outputFile=target/playwright-classpath.txt
+          java -cp "$(cat ui-tests/target/playwright-classpath.txt)" com.microsoft.playwright.CLI install --with-deps chromium
+
+      - name: Run Playwright UI tests
+        run: mvn -B -ntp -pl ui-tests test -Dplaywright.tests=true -Dapp.baseUrl=$APP_BASE_URL '-Dcucumber.filter.tags=@playwright'
+
+      - name: Collect Playwright Allure results
+        if: always()
+        run: |
+          mkdir -p target/combined-allure-results
+          cp ui-tests/target/allure-results/* target/combined-allure-results/ 2>/dev/null || true
+          cp ui-tests/target/cucumber-report.json target/cucumber-report.json 2>/dev/null || true
+
+      - name: Generate Allure and Extent HTML reports
+        id: reports
+        if: always()
+        run: |
+          npm install --no-save --prefix target/report-cli allure-commandline@2.34.1
+          python3 reporting-tools/classify_results.py target/combined-allure-results
+          target/report-cli/node_modules/.bin/allure generate target/combined-allure-results --clean -o reports/latest/allure
+          mvn -B -ntp -pl reporting-tools compile exec:java -Dexec.mainClass=org.example.automation.reporting.ExtentReportGenerator -Dexec.args=". reports/latest/extent/index.html"
+          touch reports/latest/.nojekyll
+          python3 reporting-tools/build_dashboard.py target/combined-allure-results reports/latest/index.html
+
+      - name: Publish both reports to feature branch
+        if: always() && steps.reports.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f reports/latest
+          if git diff --cached --quiet; then
+            echo "No report changes to publish"
+          else
+            git commit -m "docs(reports): publish Allure and Extent CI reports [skip ci]"
+            git push origin HEAD:feature/multi-module-test-framework
+          fi
+
+      # GitHub Pages must be enabled with Source: GitHub Actions in Settings > Pages.
+      # Deploy the report directory as the site root: /, /allure/, /extent/.
+      - name: Configure GitHub Pages
+        if: success() && steps.reports.outcome == 'success'
+        uses: actions/configure-pages@v5
+
+      - name: Upload HTML reports as Pages artifact
+        if: success() && steps.reports.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: automation-parent/reports/latest
+
+      - name: Deploy HTML reports to GitHub Pages
+        if: success() && steps.reports.outcome == 'success'
+        id: pages
+        uses: actions/deploy-pages@v4
+
+      - name: Upload test reports and failure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-framework-reports-${{ github.run_number }}
+          path: |
+            automation-parent/**/target/surefire-reports/**
+            automation-parent/ui-tests/target/failure-artifacts/**
+            automation-parent/sample-app.log
+            automation-parent/target/combined-allure-results/**
+            automation-parent/target/cucumber-report.json
+            automation-parent/reports/latest/**
+          if-no-files-found: warn
+          retention-days: 14
