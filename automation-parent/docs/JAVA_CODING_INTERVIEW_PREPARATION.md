@@ -6,7 +6,7 @@
 > **Audience:** SDET, Senior SDET, Lead Quality Engineer and Staff SDET interviews
 > **Purpose:** A practical study guide with Java patterns, complexity, SDET applications, exercises and interview checkpoints.
 
-This guide is designed to be used alongside the repository's Maven multi-module automation framework. The examples are interview-practice snippets; they are not claims that these algorithms are already implemented in the sample application. Add completed exercises to a dedicated practice package or module only when that fits the repository's architecture.
+This guide is designed to be used alongside the repository's Maven multi-module automation framework. For the expanded DSA syllabus and System Design preparation, see [DSA_AND_SYSTEM_DESIGN_ROADMAP.md](DSA_AND_SYSTEM_DESIGN_ROADMAP.md). The examples are interview-practice snippets; they are not claims that these algorithms are already implemented in the sample application. Add completed exercises to a dedicated practice package or module only when that fits the repository's architecture.
 
 ## Learning outcomes
 
