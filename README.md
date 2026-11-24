@@ -42,3 +42,17 @@ This project does not implement user authentication, OAuth, JWTs, sessions, or a
 ## Running
 
 The project uses Maven. Ensure the configured MySQL database is running and the required environment variables are available to the Java process before running database examples or tests.
+
+
+## Java Multi-Module Test Automation Framework
+
+This repository also contains a standalone Java automation framework and Service Desk demo application under `automation-parent/`. It covers JUnit 5/Mockito unit testing, REST Assured API testing, WireMock, JSON Schema, Selenium Page Objects, Playwright with Cucumber BDD, Allure and Extent reporting, and GitHub Actions CI.
+
+**Start here:** [Automation Framework README](automation-parent/README.md) — complete setup guide, architecture, manual application startup, test execution commands, report generation, CI workflow and troubleshooting.
+
+- [Live test dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/)
+- [Allure report](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
+- [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
+- [Automation Framework CI runs](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml)
+
+The automation framework is developed on `feature/multi-module-test-framework`; its workflow does not target `master`.
