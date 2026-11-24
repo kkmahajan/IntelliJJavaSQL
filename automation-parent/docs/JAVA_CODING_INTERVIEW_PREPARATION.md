@@ -1,7 +1,6 @@
 # Java Coding Interview Preparation — 10 Core Topics for SDET / Lead SDET
 
 > **Repository:** [IntelliJJavaSQL](https://github.com/kkmahajan/IntelliJJavaSQL)
-> **Learning branch:** `feature/multi-module-test-framework`
 > **Java baseline:** Java 21 (the automation framework compiles for Java 21)
 > **Audience:** SDET, Senior SDET, Lead Quality Engineer and Staff SDET interviews
 > **Purpose:** A practical study guide with Java patterns, complexity, SDET applications, exercises and interview checkpoints.
