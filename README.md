@@ -50,6 +50,8 @@ This repository also contains a standalone Java automation framework and Service
 
 **Start here:** [Automation Framework README](automation-parent/README.md) — complete setup guide, architecture, manual application startup, test execution commands, report generation, CI workflow and troubleshooting.
 
+**Java coding practice:** [10-topic Java interview preparation guide](automation-parent/docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — Strings/Arrays, HashMaps, Collections, Sets, Sorting, Two Pointers, Sliding Window, Stacks/Queues, Streams and Concurrency.
+
 - [Live test dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/)
 - [Allure report](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
 - [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
