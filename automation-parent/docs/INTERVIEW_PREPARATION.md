@@ -9,6 +9,8 @@ This document is intended for **interview preparation, project explanation, and 
 
 For algorithm and data-structure coding preparation, use [JAVA_CODING_INTERVIEW_PREPARATION.md](JAVA_CODING_INTERVIEW_PREPARATION.md). It covers ten core Java topics with code examples, complexity analysis, SDET applications, exercises and interview checkpoints.
 
+For the broader coding and architecture roadmap, see [DSA_AND_SYSTEM_DESIGN_ROADMAP.md](DSA_AND_SYSTEM_DESIGN_ROADMAP.md), including distributed test platforms, IoT and AI quality system designs, activity hours and readiness criteria.
+
 ## 1. 60-second interview introduction
 
 > I worked on building a Java-based, multi-module test automation framework that supports unit testing, API automation, UI automation, service mocking, and CI/CD integration.
