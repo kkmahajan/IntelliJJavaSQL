@@ -15,6 +15,34 @@ import static org.example.TestData.SQL_DB_USERNAME;
 public class DatabaseUtilsTest {
 
     @Test
+    public void shouldKeepLocalDevelopmentDatabaseUrlUnchanged() {
+        String url = "jdbc:mysql://localhost:3306/dbo";
+        Assert.assertEquals(DatabaseUtils.secureJdbcUrl(url), url);
+    }
+
+    @Test
+    public void shouldRequireIdentityVerificationForRemoteDatabase() {
+        Assert.assertEquals(
+                DatabaseUtils.secureJdbcUrl("jdbc:mysql://db.example.com:3306/dbo"),
+                "jdbc:mysql://db.example.com:3306/dbo?sslMode=VERIFY_IDENTITY");
+    }
+
+    @Test
+    public void shouldRejectRemoteDatabaseWithWeakerSslMode() {
+        Assert.expectThrows(
+                IllegalArgumentException.class,
+                () -> DatabaseUtils.secureJdbcUrl(
+                        "jdbc:mysql://db.example.com:3306/dbo?sslMode=REQUIRED"));
+    }
+
+    @Test
+    public void shouldRejectNonMysqlJdbcUrl() {
+        Assert.expectThrows(
+                IllegalArgumentException.class,
+                () -> DatabaseUtils.secureJdbcUrl("jdbc:postgresql://localhost:5432/test"));
+    }
+
+    @Test
     public void shouldExecuteSimpleQueryUsingConnectionPool() {
         requireDatabaseCredentials();
 
