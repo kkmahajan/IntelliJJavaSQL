@@ -745,3 +745,52 @@ Still pending:
 4. Keep implementation on `learning/ci-cd-quality-gates` and preserve the current reporting/diagnostic behaviour.
 
 **End-of-day note:** The packaging fix is committed remotely and verified. The current CI workflow is still sequential; the next work is a careful, evidence-based refactor rather than an unverified wholesale replacement.
+
+
+### Session 3 — Maven module boundaries, suite selection and report outputs (28 November 2026)
+
+**Maven module structure verified remotely**
+- Parent reactor: `automation-parent`, packaging `pom`, Java compiler release 21.
+- Modules: `sample-app`, `api-tests`, `ui-tests`, `reporting-tools`.
+- `api-tests` uses JUnit 5, REST Assured, JSON schema validation, WireMock and Allure JUnit 5.
+- `ui-tests` contains Selenium JUnit tests plus Cucumber/Playwright tests. Both UI suites share the same Maven module but can and should be run in separate CI jobs.
+- `reporting-tools` contains the Extent report generator and Python report-processing scripts.
+
+**Important distinction**
+A Maven module is a code/build boundary; a GitHub Actions job is an execution/isolation boundary. Selenium and Playwright share `ui-tests`, but separate CI jobs can still run them independently on separate runners. Each job must check out the code, set up Java/dependencies, download and verify the same app artifact, start its own app process, execute only its intended suite, and upload its own results.
+
+**Suite selection verified from source**
+- API tests use the JUnit assumption `Boolean.getBoolean("integration.tests")`; run with `-Dintegration.tests=true`. They read `app.baseUrl` (default `http://localhost:8080`).
+- Selenium JUnit tests use `Boolean.getBoolean("ui.tests")`; run with `-Dui.tests=true`. They read `app.baseUrl` and default to headless Chrome.
+- Playwright Cucumber hooks use `Boolean.getBoolean("playwright.tests")` and the Cucumber feature is tagged `@playwright @regression`; run with `-Dplaywright.tests=true -Dcucumber.filter.tags=@playwright`.
+- The current workflow's Selenium command also passes `-Dcucumber.filter.tags=@offline`. The Selenium JUnit tests are selected by `-Dui.tests=true`; the `@offline` Cucumber filter does not select the Playwright-tagged feature.
+- The initial reactor-wide offline test stage runs with integration/UI flags unset, so those gated suites are skipped by assumptions while ordinary unit tests can run. Keep a category-execution check so a mistyped flag cannot silently result in a green but unexecuted suite.
+
+**Allure and diagnostics output paths verified**
+- API Allure: `api-tests/target/allure-results`.
+- UI Allure (both Selenium and Playwright): `ui-tests/target/allure-results`.
+- Cucumber JSON: `ui-tests/target/cucumber-report.json`.
+- Selenium failure screenshots: `ui-tests/target/failure-artifacts`.
+- Both API and UI modules have `allure.properties` with `allure.results.directory=target/allure-results`.
+- `classify_results.py` labels result JSON into API, Selenium, Playwright or Unit based on Allure tags and test identifiers; it also adds UI family labels for Selenium/Playwright.
+- `verify_results.py` checks that required categories have at least one executed test, defaulting to Unit, API, Selenium and Playwright.
+
+**CI design implication**
+Because Selenium and Playwright share `ui-tests/target/allure-results`, separate jobs naturally isolate their filesystems. Each job should upload its results under a distinct artifact name (for example `selenium-results` and `playwright-results`). The reporting job should download them into separate directories first, then aggregate the result JSON and referenced attachments without flattening duplicate attachment filenames. Preserve the Cucumber JSON and Selenium failure-artifact directory as separate diagnostics.
+
+**Current workflow design matrix**
+
+| Job | Maven module / command intent | Required flag / selection | Result outputs |
+|---|---|---|---|
+| Build | `-pl sample-app -am package -DskipTests` | None | Executable sample-app JAR |
+| API | `-pl api-tests test` | `-Dintegration.tests=true` | `api-tests/target/allure-results` |
+| Selenium | `-pl ui-tests test` | `-Dui.tests=true`, exclude Playwright Cucumber tag | `ui-tests/target/allure-results`, `target/failure-artifacts` |
+| Playwright | `-pl ui-tests test` | `-Dplaywright.tests=true -Dcucumber.filter.tags=@playwright` | `ui-tests/target/allure-results`, `target/cucumber-report.json` |
+
+This is the verified design intent; exact command behaviour must be confirmed in GitHub Actions before treating the new pipeline as complete.
+
+**Next**
+- [ ] Design a reusable app-start/readiness/cleanup shell sequence for each test job.
+- [ ] Decide whether to avoid repeating Maven compilation in the two UI jobs by using Maven caching or a prebuilt test bundle; do not share runner workspaces.
+- [ ] Implement artifact upload/download and safe report aggregation.
+- [ ] Test that each category executes and the quality gate correctly reflects failures.
