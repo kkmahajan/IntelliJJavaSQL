@@ -1,4 +1,4 @@
-# IntelliJJavaSQL
+# Quality Engineering Framework
 
 A Java practice project demonstrating database access, JSON handling, API testing, and file operations.
 
@@ -63,9 +63,9 @@ This repository also contains a standalone Java automation framework and Service
 
 **Java coding practice:** [10-topic Java interview preparation guide](automation-parent/docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — Strings/Arrays, HashMaps, Collections, Sets, Sorting, Two Pointers, Sliding Window, Stacks/Queues, Streams and Concurrency.
 
-- [Live test dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/)
-- [Allure report](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
-- [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
-- [Automation Framework CI runs](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml)
+- [Live test dashboard](https://kkmahajan.github.io/quality-engineering-framework/)
+- [Allure report](https://kkmahajan.github.io/quality-engineering-framework/allure/)
+- [Extent report](https://kkmahajan.github.io/quality-engineering-framework/extent/)
+- [Automation Framework CI runs](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml)
 
 The automation framework's CI workflow runs on pull requests and on pushes to `master` that change `automation-parent/**`.
