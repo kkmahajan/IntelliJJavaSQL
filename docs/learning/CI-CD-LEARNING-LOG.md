@@ -968,3 +968,125 @@ The user selected **B** and correctly reasoned that a suite that does not comple
 Completed the final gate-design exercise. Key principle reinforced: the quality gate evaluates verified execution and test outcomes for every required suite; it must not infer success from partial results or successful reporting. Preserve partial evidence and the known infrastructure failure reason (`RUNNER_CRASH`) for investigation.
 
 **Next session:** move from architecture/design into a careful implementation plan. Reinspect the current workflow and define job dependencies, artifact handoffs, suite-result contract, and gate behavior before making workflow changes.
+
+
+## 11. Today's Lead SDET principles — one-line playbook (28 November 2026)
+
+These are the concise principles and mental models from today's learning. Keep them as a quick revision sheet; the detailed explanations, examples and validation notes remain in the sections above.
+
+### Lead SDET mindset
+
+- **Senior SDET:** “Are all my tests running?” **Lead SDET:** “Are they running independently, reliably, quickly, securely, and do their results make the right release decision?”
+- **Lead SDET →** Own the confidence to release, not just the number of tests written.
+- **Lead SDET →** Design the system that makes failures visible, diagnosable and actionable.
+- **Lead SDET →** Optimize for trustworthy feedback, not merely a green pipeline.
+- **Lead SDET →** Treat test infrastructure, evidence and release decisions as engineering responsibilities.
+- **Lead SDET →** Turn repeated manual effort into reliable automation and repeatable engineering practices.
+
+### Pipeline architecture and execution
+
+- **Build once; test the same build everywhere.**
+- **One build artifact; independent test environments.**
+- **A shared JAR is not a shared process; every isolated runner needs its own reachable application instance.**
+- **Parallelize independent suites; preserve explicit dependencies where they matter.**
+- **A Maven module is a code/build boundary; a CI job is an execution/isolation boundary.**
+- **Parallel execution should reduce feedback time without reducing test independence.**
+- **More workers do not automatically mean faster feedback; capacity and contention set the limit.**
+- **Balance shards by execution time, not only by test count.**
+- **Use unique test data, users, ports and resources for parallel workers.**
+- **Concurrency controls coordinate workflow runs; they do not isolate test data.**
+- **Use bounded readiness polling, not blind fixed sleeps.**
+- **When startup fails, capture application logs before the evidence disappears.**
+
+### Artifact integrity and provenance
+
+- **A passing test against the wrong binary is not valid evidence.**
+- **Checksum proves byte integrity; provenance proves where the artifact came from.**
+- **Verify the downloaded artifact against the checksum created by the build job—not against a checksum generated beside the download.**
+- **Trace every release: source commit → build → artifact → test results → deployment.**
+- **Deploy the exact artifact that passed testing; do not rebuild at deployment time.**
+- **Never silently replace a missing, stale or unverified artifact.**
+- **A failed consumer download should fail that consumer; independent consumers can continue if their own artifacts verify.**
+- **Treat build artifacts as immutable inputs to downstream jobs.**
+
+### Test selection, execution and result contracts
+
+- **A successful Maven exit code does not prove that the required tests ran.**
+- **Validate executed test counts and categories; do not trust process exit codes alone.**
+- **Execution status and test outcome are two different dimensions.**
+- **COMPLETED does not mean PASSED; it means execution finished and the outcome can be evaluated.**
+- **NOT_STARTED is not a pass; a required suite that never starts blocks the gate.**
+- **SKIPPED is acceptable only when policy explicitly says the suite is not required for that run.**
+- **INCOMPLETE means execution started but did not finish reliably.**
+- **When a runner crashes, preserve known executed tests, mark the final outcome UNKNOWN when necessary, and record the infrastructure reason.**
+- **A required suite must produce verifiable execution and evidence—not merely a successful job status.**
+- **Make every suite speak the same machine-readable result contract.**
+
+### Failure handling, retries and diagnostics
+
+- **Let independent suites finish even when one suite fails.**
+- **Fail the release gate when any required suite fails, cannot start or remains incomplete.**
+- **Retry transient failures selectively; never use retries to hide product defects.**
+- **A test that passes only on retry is still a flaky-test signal.**
+- **Preserve first-attempt failures, retry outcomes, screenshots, traces and logs.**
+- **A runner crash is an execution failure, even if the tests completed before the crash appear green.**
+- **Do not turn unknown into passed.**
+- **Investigate missing or partial evidence instead of assuming success.**
+
+### Artifacts, reporting and quality gates
+
+- **Independent jobs need explicit artifact handoffs; runner filesystems are not shared.**
+- **Give each suite its own artifact identity and preserve its directory boundary.**
+- **Never flatten result artifacts blindly; duplicate attachment names can overwrite evidence.**
+- **Keep Allure result JSON and the attachments it references together.**
+- **Generate diagnostic reports even when tests fail, whenever enough evidence exists.**
+- **A successful report is not a successful test run.**
+- **Report publication and application deployment are different decisions.**
+- **Publish failure diagnostics; block an unsafe release.**
+- **The quality gate must evaluate every required suite, not just the reporting job.**
+- **A required suite that did not execute is a quality-gate failure, not a neutral result.**
+- **Partial evidence helps investigation; it cannot certify completion.**
+- **A green pipeline must mean verified, complete and successful required testing.**
+
+### Project-specific reminders captured today
+
+- API suite selection requires `-Dintegration.tests=true`.
+- Selenium JUnit selection requires `-Dui.tests=true`.
+- Playwright selection requires `-Dplaywright.tests=true -Dcucumber.filter.tags=@playwright`.
+- API Allure results: `api-tests/target/allure-results`.
+- Selenium and Playwright Allure results: `ui-tests/target/allure-results` in their separate job workspaces.
+- Cucumber JSON: `ui-tests/target/cucumber-report.json`.
+- Selenium failure evidence: `ui-tests/target/failure-artifacts`.
+- Spring Boot executable packaging requires the configured `repackage` goal; the remote POM fix was verified.
+- Current workflow is still sequential; no workflow refactor was made today.
+- Preserve the existing trigger scope until explicitly reviewed; keep implementation on `learning/ci-cd-quality-gates`.
+
+## 12. Today's learning — compact point-wise revision
+
+1. GitHub Actions building blocks: workflows, triggers, jobs, runners, steps, artifacts, permissions, dependencies and concurrency.
+2. Why a multi-job design helps: API, Selenium and Playwright can execute independently and in parallel.
+3. Runner isolation: every job normally receives a fresh runner; localhost and local files do not cross job boundaries.
+4. Pipeline shape: build/package → parallel suites → collect results → reporting → quality gate → report publication/release decision.
+5. Build-once strategy: package one runnable application artifact, upload it, and let each suite download and start its own instance.
+6. Artifact failure boundaries: central build failure blocks dependent suites; one consumer's download failure need not block other consumers.
+7. Readiness: use bounded polling against a confirmed endpoint; capture logs and fail clearly on timeout.
+8. Retry policy: retry only classified transient issues; preserve first-attempt evidence and report flaky tests.
+9. Parallelism: understand workflow-, job-, worker- and shard-level parallelism; tune against real resource capacity.
+10. Isolation: prevent collisions across test data, users, tenants, ports, browser sessions, databases and external service limits.
+11. Concurrency: control overlapping runs deliberately; cancellation policy and test-data isolation are separate concerns.
+12. Artifact safety: unique artifact names, separate download directories, no blind flattening, preserve Allure attachments.
+13. Integrity: verify SHA-256 using the checksum generated by the build producer.
+14. Provenance: verify source commit metadata as well as checksum; preserve the commit-to-deployment chain.
+15. Exact deployment: deploy the same artifact that passed the required tests.
+16. Maven understanding: distinguish module boundaries from CI job boundaries; Selenium and Playwright can run separately even though they share the UI module.
+17. Suite selection: pass the correct Maven system properties and Cucumber tag filters; assert that the intended tests actually executed.
+18. Reporting: preserve API, Selenium and Playwright evidence separately before aggregation; keep Cucumber JSON and failure artifacts.
+19. Suite-result contract: record suite, commit, verification status, execution status, outcome, counts, evidence status and failure reason.
+20. Status semantics: COMPLETED, NOT_STARTED, SKIPPED and INCOMPLETE describe execution; PASSED, FAILED and UNKNOWN describe outcome.
+21. Gate policy: every required suite must have verified provenance, complete execution, actual test execution, no blocking failures and mandatory evidence.
+22. Failure scenario: API and Playwright passed, Selenium runner crashed after 100 tests → Selenium INCOMPLETE/UNKNOWN, retain evidence, final gate FAIL.
+23. Reporting scenario: Allure and Extent can succeed while the quality gate fails; reporting success never overrides test status.
+24. Implementation status: executable Spring Boot JAR packaging fix verified remotely; workflow refactor remains pending.
+25. Next step: inspect the current workflow and module commands, design the job/result/artifact contract, then implement incrementally on this learning branch.
+
+**End-of-day takeaway:** A Lead SDET does not simply make tests run in CI. A Lead SDET engineers trustworthy evidence and a release decision that the team can safely rely on.
