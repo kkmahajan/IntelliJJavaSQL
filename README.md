@@ -11,7 +11,7 @@ SQL_DB_USERNAME=<dedicated database username>
 SQL_DB_KEY=<your database password>
 ```
 
-The JDBC URL defaults to `src/test/resources/config.properties`:
+The JDBC URL defaults to `src/main/resources/config.properties` (loaded from the classpath, so the working directory does not matter):
 
 ```properties
 sqlDbUrl=jdbc:mysql://localhost:3306/dbo
@@ -68,4 +68,4 @@ This repository also contains a standalone Java automation framework and Service
 - [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
 - [Automation Framework CI runs](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml)
 
-The automation framework is developed on `feature/multi-module-test-framework`; its workflow does not target `master`.
+The automation framework's CI workflow runs on pull requests and on pushes to `master` that change `automation-parent/**`.

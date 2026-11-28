@@ -3,7 +3,7 @@ package javafeatures;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ReverseString {
+public class ReverseStringTest {
 
     @Test
     public void shouldReverseString() {

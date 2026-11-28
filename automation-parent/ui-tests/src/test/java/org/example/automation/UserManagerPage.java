@@ -1,5 +1,6 @@
 package org.example.automation;
 
+import io.qameta.allure.Allure;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -17,17 +18,25 @@ final class UserManagerPage {
         this.wait = new WebDriverWait(driver, timeout);
     }
 
+    /**
+     * Runs the action INSIDE an Allure step so the step's status reflects what
+     * happened. A bare Allure.step("text") is recorded as passed immediately,
+     * before the action runs, so a failing action would still show a green step.
+     */
+    private static void step(String text, Runnable action) {
+        Allure.step(text, () -> { action.run(); });
+    }
+
     void open(String baseUrl) {
-        io.qameta.allure.Allure.step("Navigate to " + baseUrl);
-        driver.get(baseUrl);
-        wait.until(d -> d.findElement(By.id("users")).getText().contains("John Watson"));
+        step("Navigate to " + baseUrl, () -> driver.get(baseUrl));
+        step("Wait for seeded user to be listed",
+                () -> wait.until(d -> d.findElement(By.id("users")).getText().contains("John Watson")));
     }
 
     void search(String query) {
         WebElement field = driver.findElement(By.id("search"));
         field.clear();
-        io.qameta.allure.Allure.step("Enter search query: " + query);
-        field.sendKeys(query);
+        step("Enter search query: " + query, () -> field.sendKeys(query));
     }
 
     boolean containsUser(String name) {
@@ -46,16 +55,13 @@ final class UserManagerPage {
         WebElement nameField = driver.findElement(By.id("name"));
         WebElement emailField = driver.findElement(By.id("email"));
         nameField.clear();
-        io.qameta.allure.Allure.step("Fill #name: " + name);
-        nameField.sendKeys(name);
+        step("Fill #name: " + name, () -> nameField.sendKeys(name));
         emailField.clear();
-        io.qameta.allure.Allure.step("Fill #email: " + email);
-        emailField.sendKeys(email);
+        step("Fill #email: " + email, () -> emailField.sendKeys(email));
     }
 
     void save() {
-        io.qameta.allure.Allure.step("Click Save button (#save)");
-        driver.findElement(By.id("save")).click();
+        step("Click Save button (#save)", () -> driver.findElement(By.id("save")).click());
     }
 
     void create(String name, String email) {
@@ -77,15 +83,14 @@ final class UserManagerPage {
     void delete(String name) {
         driver.findElement(By.cssSelector("button[aria-label='Delete " + name + "']")).click();
         Alert confirmation = wait.until(ExpectedConditions.alertIsPresent());
-        io.qameta.allure.Allure.step("Accept delete confirmation");
-        confirmation.accept();
+        step("Accept delete confirmation", confirmation::accept);
         waitForMessage("User deleted");
         waitForUserAbsent(name);
     }
 
     void waitForMessage(String message) {
-        wait.until(d -> d.findElement(By.id("message")).getText().contains(message));
-        io.qameta.allure.Allure.step("Verified UI message: " + message);
+        step("Verify UI message: " + message,
+                () -> wait.until(d -> d.findElement(By.id("message")).getText().contains(message)));
     }
 
     void waitForAnyMessage() {

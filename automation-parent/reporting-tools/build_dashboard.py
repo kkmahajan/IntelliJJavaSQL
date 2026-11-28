@@ -7,6 +7,15 @@ import sys
 
 results = pathlib.Path(sys.argv[1])
 output = pathlib.Path(sys.argv[2])
+# Generated Allure report. Its test pages are addressed by the report's own
+# test-case uid, NOT by the raw result file's uuid, so build a historyId -> uid
+# map from the generated report (run `allure generate` before this script).
+report = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else output.parent / "allure"
+uid_by_history = {}
+for case_file in (report / "data" / "test-cases").glob("*.json"):
+    case = json.loads(case_file.read_text(encoding="utf-8"))
+    if case.get("historyId") and case.get("uid"):
+        uid_by_history[case["historyId"]] = case["uid"]
 rows = []
 for path in sorted(results.glob("*-result.json")):
     result = json.loads(path.read_text(encoding="utf-8"))
@@ -17,7 +26,7 @@ for path in sorted(results.glob("*-result.json")):
     rows.append({"name": result.get("name", "Unnamed test"), "type": category,
                  "family": "UI" if category in ("Playwright", "Selenium") else category,
                  "status": result.get("status", "unknown"),
-                 "id": result.get("uuid", "")})
+                 "uid": uid_by_history.get(result.get("historyId", ""), "")})
 data = json.dumps(rows, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
 page = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -66,7 +75,7 @@ function render(){
       if(val===t.status)td.className=t.status;tr.append(td);
     }
     const td=document.createElement('td');const a=document.createElement('a');
-    a.href='allure/index.html#testresult/'+encodeURIComponent(t.id);
+    a.href=t.uid?'allure/index.html#testresult/'+encodeURIComponent(t.uid):'allure/index.html';
     a.textContent='View steps';td.append(a);tr.append(td);tbody.append(tr);
   }
 }

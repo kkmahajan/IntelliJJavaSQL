@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.example.TestData.SQL_DB_KEY;
 import static org.example.TestData.SQL_DB_URL;
@@ -24,6 +26,14 @@ public class DatabaseUtils implements AutoCloseable {
     private static final int VALIDATION_TIMEOUT_MS = 5_000;
     private static final int QUERY_TIMEOUT_SECONDS = 5;
     private static final int MAX_POOL_SIZE = 5;
+
+    // Host is either a bracketed IPv6 literal (JDBC writes loopback as [::1]) or a plain host name/IPv4.
+    private static final Pattern MYSQL_HOST = Pattern.compile(
+            "^jdbc:mysql://(\\[[0-9a-fA-F:.]+\\]|[^/:?#\\[\\]]+)(?::\\d+)?(?:/|\\?|$)",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern SSL_MODE = Pattern.compile("[?&]sslMode=([^&]*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LEGACY_SSL = Pattern.compile(
+            "[?&](?:useSSL|requireSSL|verifyServerCertificate)=", Pattern.CASE_INSENSITIVE);
 
     private final HikariDataSource dataSource;
 
@@ -106,10 +116,7 @@ public class DatabaseUtils implements AutoCloseable {
             throw new IllegalArgumentException("Only MySQL JDBC URLs are supported");
         }
 
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("^jdbc:mysql://([^/:?#]+)(?::\\d+)?(?:/|\\?|$)", java.util.regex.Pattern.CASE_INSENSITIVE)
-                .matcher(jdbcUrl);
-
+        Matcher matcher = MYSQL_HOST.matcher(jdbcUrl);
         if (!matcher.find()) {
             throw new IllegalArgumentException("Invalid MySQL JDBC URL");
         }
@@ -117,21 +124,30 @@ public class DatabaseUtils implements AutoCloseable {
         String host = matcher.group(1);
         boolean localHost = host.equalsIgnoreCase("localhost")
                 || host.equals("127.0.0.1")
-                || host.equals("::1");
+                || host.equals("[::1]");
 
         if (localHost) {
             return jdbcUrl;
         }
 
-        java.util.regex.Matcher sslMode = java.util.regex.Pattern
-                .compile("(?:[?&])sslMode=([^&]*)", java.util.regex.Pattern.CASE_INSENSITIVE)
-                .matcher(jdbcUrl);
+        // Legacy flags can switch TLS or certificate checks off; they are not allowed for remote hosts.
+        if (LEGACY_SSL.matcher(jdbcUrl).find()) {
+            throw new IllegalArgumentException(
+                    "Remote MySQL connections must use sslMode=VERIFY_IDENTITY, "
+                            + "not useSSL/requireSSL/verifyServerCertificate");
+        }
 
-        if (sslMode.find()) {
+        // Check EVERY sslMode occurrence: the driver may honour a later one over the first.
+        Matcher sslMode = SSL_MODE.matcher(jdbcUrl);
+        boolean sslModeFound = false;
+        while (sslMode.find()) {
+            sslModeFound = true;
             if (!"VERIFY_IDENTITY".equalsIgnoreCase(sslMode.group(1))) {
                 throw new IllegalArgumentException(
                         "Remote MySQL connections must use sslMode=VERIFY_IDENTITY");
             }
+        }
+        if (sslModeFound) {
             return jdbcUrl;
         }
 
