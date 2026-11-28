@@ -1,9 +1,9 @@
 # Interview Preparation — Java Multi-Module Test Automation Framework
 
 > **Project:** Service Desk Application + Java Multi-Module Test Automation Framework  
-> **Repository:** [IntelliJJavaSQL](https://github.com/kkmahajan/IntelliJJavaSQL/tree/master/automation-parent)  
+> **Repository:** [quality-engineering-framework](https://github.com/kkmahajan/quality-engineering-framework/tree/master/automation-parent)  
 > **Stack:** Java 21, Maven, JUnit 5, Mockito, REST Assured, WireMock, JSON Schema, Selenium WebDriver, Playwright Java, Spring Boot, GitHub Actions, Allure, ExtentReports, GitHub Pages  
-> **Verified CI baseline:** [Successful run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) — tests and dual-report generation/publication succeeded. GitHub Pages deployment was added later; verify its own CI step before claiming the live URLs work.
+> **Verified CI baseline:** [Successful run #41225043401](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41225043401) — tests and dual-report generation/publication succeeded. GitHub Pages deployment was added later; verify its own CI step before claiming the live URLs work.
 
 This document is intended for **interview preparation, project explanation, and resume writing**. For the full implementation walkthrough, see [COMPLETE_TUTORIAL.md](COMPLETE_TUTORIAL.md).
 
@@ -204,10 +204,10 @@ Be prepared to navigate to the actual Java files, explain at least one test from
 
 - [Complete implementation tutorial](COMPLETE_TUTORIAL.md)
 - [Project README](../README.md)
-- [Verified successful dual-report CI run](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401)
-- [Report dashboard (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/)
-- [Allure (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
-- [Extent (expected after Pages deployment)](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
+- [Verified successful dual-report CI run](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41225043401)
+- [Report dashboard (expected after Pages deployment)](https://kkmahajan.github.io/quality-engineering-framework/)
+- [Allure (expected after Pages deployment)](https://kkmahajan.github.io/quality-engineering-framework/allure/)
+- [Extent (expected after Pages deployment)](https://kkmahajan.github.io/quality-engineering-framework/extent/)
 
 ## 9. Reporting architecture: whiteboard explanation
 
@@ -223,7 +223,7 @@ JUnit 5 test suites
                                       GitHub Pages deployment (configured)
 ```
 
-**Interview talking point:** Report generation and report hosting are different responsibilities. I verified dual-report generation and publication in [CI run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401). I then added GitHub Pages deployment, which needs a separate successful Pages job and repository configuration before its URLs are considered live.
+**Interview talking point:** Report generation and report hosting are different responsibilities. I verified dual-report generation and publication in [CI run #41225043401](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41225043401). I then added GitHub Pages deployment, which needs a separate successful Pages job and repository configuration before its URLs are considered live.
 
 ### Practical demo checklist
 
@@ -311,9 +311,9 @@ Install Playwright Chromium first if running locally. GitHub Actions installs it
 
 ### Where to inspect
 
-- Dashboard: https://kkmahajan.github.io/IntelliJJavaSQL/
-- Allure: https://kkmahajan.github.io/IntelliJJavaSQL/allure/
-- Extent: https://kkmahajan.github.io/IntelliJJavaSQL/extent/
+- Dashboard: https://kkmahajan.github.io/quality-engineering-framework/
+- Allure: https://kkmahajan.github.io/quality-engineering-framework/allure/
+- Extent: https://kkmahajan.github.io/quality-engineering-framework/extent/
 - Raw BDD JSON: `automation-parent/target/cucumber-report.json` in CI artifacts
 - Failure screenshots: `ui-tests/target/failure-artifacts` and Allure attachments
 
