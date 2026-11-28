@@ -639,3 +639,109 @@ The user confirmed the local `sample-app/pom.xml` change was pushed to the CI/CD
 - Remote POM blob SHA at verification: `9576514b62cef9707eb96e63826896e5a1844a23`.
 
 **Status:** The executable-JAR packaging fix is now present on the remote learning branch. The workflow itself remains unchanged and still runs suites sequentially. Next, inspect the parent/API/UI Maven configuration and test/report output paths before making the first workflow refactor. Keep changes on `learning/ci-cd-quality-gates`; do not modify `master`.
+
+
+### Session 2 — end-of-day checkpoint: artifact integrity, provenance and branch verification (28 November 2026)
+
+This checkpoint consolidates the concepts covered and the repository work completed today. Earlier sections in this log remain the detailed record of the preceding lessons and local validation; this section records today's continuation and current hand-off state.
+
+#### A. Concepts learned and knowledge checks
+
+**1. Parallel artifact consumption and runner isolation**
+- API, Selenium and Playwright jobs can each download the same uploaded build artifact in parallel.
+- GitHub Actions jobs normally run on separate, fresh runners. Each job receives its own downloaded file copy and has its own filesystem and `localhost`.
+- Each suite must start its own application process when using a locally hosted sample app. Sharing a JAR does not share a running process.
+- If one job modifies its local JAR copy, it does not modify the copies downloaded by other jobs. Nevertheless, test jobs should treat build artifacts as immutable; mutation should be avoided and integrity can be checked.
+
+Knowledge check: user answered **B** to the scenario where the API job accidentally modifies its downloaded JAR. Correct principle: the other jobs' copies remain unaffected; preserve immutable artifact handling and verify integrity where practical. The user also selected D; clarified that jobs do not share one application process or localhost.
+
+**2. Artifact immutability and integrity**
+- Build once, publish one validated artifact, and let each downstream job consume its own copy.
+- Avoid rebuilding or modifying the binary in downstream test jobs.
+- A SHA-256 checksum can verify that a downloaded file matches the file produced by the build job.
+
+Illustrative commands:
+
+```bash
+sha256sum sample-app-1.0-SNAPSHOT.jar > sample-app.jar.sha256
+sha256sum -c sample-app.jar.sha256
+```
+
+The checksum file must travel with the artifact, and verification must run in each consuming job before the JAR is started.
+
+Knowledge check: user answered **B** to the local-copy modification scenario. Correct.
+
+**3. Artifact provenance**
+A reliable delivery pipeline should preserve the relationship:
+
+`Git commit → CI workflow run → Build artifact → Test results → Deployment`
+
+Useful metadata:
+- Git commit SHA.
+- Workflow run ID (and run attempt where relevant).
+- Artifact name/version.
+- SHA-256 checksum.
+- Build timestamp.
+
+Release integrity principle: deploy the exact artifact that passed the required tests. Do not rebuild during deployment, because a second build may produce a different binary from the one that was validated.
+
+Knowledge check: production defect traced to a JAR from an older commit. User answered **B**: record and verify the commit SHA associated with every build artifact and deployment. Correct.
+
+#### B. Repository inspection and implementation status
+
+Repository: `kkmahajan/IntelliJJavaSQL`  
+Working branch: `learning/ci-cd-quality-gates`
+
+**1. User's local Spring Boot packaging fix**
+- User confirmed the change was pushed to the CI/CD learning branch.
+- Re-fetched `automation-parent/sample-app/pom.xml` from the remote branch.
+- Verified the Spring Boot Maven plugin contains an explicit `repackage` goal execution.
+- Remote POM blob SHA at verification: `9576514b62cef9707eb96e63826896e5a1844a23`.
+- This confirms the locally tested executable-JAR packaging fix is now present remotely.
+
+**2. Actual branch ref**
+- The GitHub branch ref is `learning/ci-cd-quality-gates`.
+- The shorter ref `ci-cd-quality-gates` returned GitHub 404 / no commit found. Use the full existing branch name for future reads and writes.
+
+**3. Current workflow inspected**
+File: `.github/workflows/automation-framework-ci.yml`
+
+Verified current state:
+- One `test` job on `ubuntu-24.04`, Java 21.
+- Application is currently started with `mvn ... spring-boot:run`, not from the packaged executable JAR.
+- API, Selenium and Playwright suites currently execute sequentially in that same job.
+- Allure and Extent reports are generated.
+- Test/failure artifacts are uploaded with `if: always()`.
+- A separate Pages `publish` job depends on `test`.
+- `push` and `pull_request` triggers currently target `master`; `workflow_dispatch` is enabled.
+- The workflow has not yet been refactored. No workflow changes were made during this session.
+
+#### C. Current status
+
+Completed:
+- [x] Explain how parallel test jobs consume independent copies of the same artifact.
+- [x] Clarify that each job starts its own app process; jobs do not share localhost.
+- [x] Explain artifact immutability and SHA-256 integrity checks.
+- [x] Explain commit-to-artifact-to-deployment provenance.
+- [x] Confirm the Spring Boot `repackage` fix exists on the remote learning branch.
+- [x] Inspect and document the existing workflow architecture and trigger configuration.
+- [x] Keep all GitHub documentation updates on `learning/ci-cd-quality-gates`; no changes to `master`.
+
+Still pending:
+- [ ] Inspect parent POM, API/UI module POMs, test execution flags and report output paths.
+- [ ] Design the build job to package the JAR, start it, perform bounded readiness polling against a confirmed endpoint, capture diagnostics on failure, stop the process and upload only after successful smoke validation.
+- [ ] Include the JAR, checksum and provenance metadata in the build artifact.
+- [ ] Create independent API, Selenium and Playwright jobs that download and verify the same artifact, then each start their own app process.
+- [ ] Upload suite-specific Allure results and failure diagnostics without flattening attachment directories.
+- [ ] Aggregate results, generate Allure/Extent reports even after test failures, and implement an explicit quality gate.
+- [ ] Validate successful and intentionally failing workflow runs on GitHub Actions.
+- [ ] Deliberately decide how the learning branch should be triggered; do not change `master` trigger behaviour without explicit review.
+
+#### D. Next session — exact starting point
+
+1. Inspect the parent POM and API/UI module POMs, including Surefire configuration and test-selection properties.
+2. Confirm where each suite writes Allure results, Cucumber JSON, Surefire XML and failure artifacts.
+3. Draft the build job and artifact contract before splitting the test suites.
+4. Keep implementation on `learning/ci-cd-quality-gates` and preserve the current reporting/diagnostic behaviour.
+
+**End-of-day note:** The packaging fix is committed remotely and verified. The current CI workflow is still sequential; the next work is a careful, evidence-based refactor rather than an unverified wholesale replacement.
