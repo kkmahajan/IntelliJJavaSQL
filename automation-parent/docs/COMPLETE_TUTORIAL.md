@@ -1,6 +1,6 @@
 # Complete tutorial: Java multi-module test automation framework
 
-> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–8 (including the Service Desk application, dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
+> **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–8 (including the Service Desk application, dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
 >
 > **Branch and CI:** The CI workflow runs on pull requests and on pushes to `master` that touch `automation-parent/**`. Pages deployment happens from `master` only.
 
@@ -47,8 +47,8 @@ Install Java **21 or newer**, Maven 3.x, Git and Google Chrome. Java 21 is the c
 ### 2.1 Clone and select the working branch
 
 ```powershell
-git clone https://github.com/kkmahajan/IntelliJJavaSQL.git
-cd IntelliJJavaSQL
+git clone https://github.com/kkmahajan/quality-engineering-framework.git
+cd quality-engineering-framework
 cd automation-parent
 java -version
 mvn -version
@@ -100,7 +100,7 @@ To watch browsers interact, add `"-Dui.headless=false"` to the Selenium or Playw
 ## 3. Maven reactor and module structure
 
 ```text
-IntelliJJavaSQL/
+quality-engineering-framework/
 ├── .github/workflows/automation-framework-ci.yml
 └── automation-parent/
     ├── pom.xml                         # parent Maven reactor
@@ -363,7 +363,7 @@ The readiness loop polls for up to 60 attempts, two seconds apart, rather than g
 
 ### 11.1 How to read a run
 
-Go to [Automation Framework CI](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml), choose a run, open the job, and expand the failed step. Look for the **first** `[ERROR]` or nonzero process exit. The successful baseline is [run 41223588652](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41223588652): all workflow steps succeeded, including Playwright installation and execution.
+Go to [Automation Framework CI](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml), choose a run, open the job, and expand the failed step. Look for the **first** `[ERROR]` or nonzero process exit. The successful baseline is [run 41223588652](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41223588652): all workflow steps succeeded, including Playwright installation and execution.
 
 ### 11.2 Why 26 tests means separate invocations
 
@@ -433,7 +433,7 @@ The verified CI baseline is **26 unique tests passing across stages**, not a gua
 
 ## 15. Phase 6: Allure and Extent reports
 
-**Implemented and verified:** [CI run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) successfully ran the report-generation, feature-branch publication, and artifact-upload steps. Allure and Extent are generated together for the same workflow run.
+**Implemented and verified:** [CI run #41225043401](https://github.com/kkmahajan/quality-engineering-framework/actions/runs/41225043401) successfully ran the report-generation, feature-branch publication, and artifact-upload steps. Allure and Extent are generated together for the same workflow run.
 
 ### What changed in the code?
 
@@ -494,11 +494,11 @@ A report committed to GitHub is stored as a file, not served as a website. GitHu
 
 ### Repository settings
 
-1. Open [Settings → Pages](https://github.com/kkmahajan/IntelliJJavaSQL/settings/pages).
+1. Open [Settings → Pages](https://github.com/kkmahajan/quality-engineering-framework/settings/pages).
 2. Under **Build and deployment**, select **Source: GitHub Actions**.
 3. Ensure Actions are enabled and that the workflow is allowed to deploy Pages. Only the `publish` job requests `pages: write` and `id-token: write`; no job needs `contents: write`.
 4. Push or merge a change to `automation-parent/**` or the workflow on `master`, or manually run the workflow on `master`.
-5. In [Actions](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml), verify the **Upload HTML reports as Pages artifact** step (in the `test` job) and the `publish` job's **Deploy HTML reports to GitHub Pages** step succeed.
+5. In [Actions](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml), verify the **Upload HTML reports as Pages artifact** step (in the `test` job) and the `publish` job's **Deploy HTML reports to GitHub Pages** step succeed.
 6. Visit **Settings → Pages** to confirm the live site address.
 
 ### How the workflow deploys the files
@@ -534,9 +534,9 @@ The directory `automation-parent/reports/latest/` becomes the **root** of the Pa
 
 | Page | Expected URL after successful deployment |
 | --- | --- |
-| Report dashboard | https://kkmahajan.github.io/IntelliJJavaSQL/ |
-| Allure | https://kkmahajan.github.io/IntelliJJavaSQL/allure/ |
-| Extent | https://kkmahajan.github.io/IntelliJJavaSQL/extent/ |
+| Report dashboard | https://kkmahajan.github.io/quality-engineering-framework/ |
+| Allure | https://kkmahajan.github.io/quality-engineering-framework/allure/ |
+| Extent | https://kkmahajan.github.io/quality-engineering-framework/extent/ |
 
 These are **expected**, not proof that deployment has completed. If GitHub Pages is configured with a custom domain or the deployment fails, the actual behavior will differ.
 
@@ -723,9 +723,9 @@ Install Playwright Chromium first if running locally. GitHub Actions installs it
 
 ### Where to inspect
 
-- Dashboard: https://kkmahajan.github.io/IntelliJJavaSQL/
-- Allure: https://kkmahajan.github.io/IntelliJJavaSQL/allure/
-- Extent: https://kkmahajan.github.io/IntelliJJavaSQL/extent/
+- Dashboard: https://kkmahajan.github.io/quality-engineering-framework/
+- Allure: https://kkmahajan.github.io/quality-engineering-framework/allure/
+- Extent: https://kkmahajan.github.io/quality-engineering-framework/extent/
 - Raw BDD JSON: `automation-parent/target/cucumber-report.json` in CI artifacts
 - Failure screenshots: `ui-tests/target/failure-artifacts` and Allure attachments
 
@@ -743,6 +743,6 @@ Install Playwright Chromium first if running locally. GitHub Actions installs it
 
 ### Test-type filters in CI reports
 
-The GitHub Pages dashboard at https://kkmahajan.github.io/IntelliJJavaSQL/ now generates an interactive test table from the **actual combined Allure JSON results**. Select **All**, **UI**, **API**, **Selenium**, **Playwright**, or **Unit**; search by test name and follow **View steps** to the detailed Allure result. UI includes both Selenium and Playwright. Allure also receives corresponding test-type tags; Extent assigns the same test types as category filters.
+The GitHub Pages dashboard at https://kkmahajan.github.io/quality-engineering-framework/ now generates an interactive test table from the **actual combined Allure JSON results**. Select **All**, **UI**, **API**, **Selenium**, **Playwright**, or **Unit**; search by test name and follow **View steps** to the detailed Allure result. UI includes both Selenium and Playwright. Allure also receives corresponding test-type tags; Extent assigns the same test types as category filters.
 
 Implementation: `reporting-tools/classify_results.py` tags result JSON; `reporting-tools/build_dashboard.py` generates the interactive static HTML dashboard; `ExtentReportGenerator.java` assigns categories. GitHub Actions runs these generators during report publishing. Historical run artifacts remain unchanged; filters appear on newly generated reports after CI succeeds.
