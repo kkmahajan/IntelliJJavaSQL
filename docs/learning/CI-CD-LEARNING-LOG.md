@@ -843,3 +843,86 @@ sha256sum -c sample-app-1.0-SNAPSHOT.jar.sha256
 - [ ] Design the explicit job-result contract for each suite (execution status, executed test count, artifact verification status, result artifact availability).
 - [ ] Draft the reporting and quality-gate dependency/condition logic, including failed and skipped jobs.
 - [ ] Implement only after reviewing the current workflow and its trigger scope; keep changes on `learning/ci-cd-quality-gates` and leave `master` untouched.
+
+
+### Session 4 — continued: suite-result contract and required execution validation (28 November 2026)
+
+**Standard suite-result contract**
+
+Each required suite should publish a machine-readable result record, including:
+- Suite name and source commit.
+- Artifact integrity and provenance verification outcomes.
+- Execution status.
+- Tests executed, passed and failed.
+- Evidence upload status.
+- A failure reason when a prerequisite or execution step prevents completion.
+
+Illustrative completed API result:
+```json
+{
+  "suite": "API",
+  "sourceCommit": "abc123",
+  "artifactVerified": true,
+  "provenanceVerified": true,
+  "executionStatus": "COMPLETED",
+  "testsExecuted": 120,
+  "testsPassed": 120,
+  "testsFailed": 0,
+  "evidenceUploaded": true,
+  "failureReason": null
+}
+```
+
+Illustrative Playwright result when runner provisioning prevents execution:
+```json
+{
+  "suite": "PLAYWRIGHT",
+  "sourceCommit": "abc123",
+  "artifactVerified": true,
+  "provenanceVerified": true,
+  "executionStatus": "NOT_STARTED",
+  "testsExecuted": 0,
+  "testsPassed": 0,
+  "testsFailed": 0,
+  "evidenceUploaded": false,
+  "failureReason": "RUNNER_PROVISIONING_FAILED"
+}
+```
+
+**Execution status and test outcome are separate dimensions**
+- `COMPLETED`: suite execution finished; its test outcome may still be pass or fail.
+- `NOT_STARTED`: a prerequisite/infrastructure issue prevented execution.
+- `SKIPPED`: intentionally excluded by the declared pipeline policy.
+- `INCOMPLETE`: execution began but did not finish reliably.
+
+A required suite marked `NOT_STARTED` is a blocking quality-gate failure, not a pass. An intentionally skipped suite is acceptable only when the pipeline policy explicitly marks it non-required for that run.
+
+**Reporting and evidence are separate from test outcome**
+- Reporting may successfully generate Allure/Extent reports from available evidence even when a suite failed or did not start.
+- A reporting job's success must not override suite failures.
+- If mandatory evidence upload or download fails, preserve the exact failure boundary: tests may have passed, but the evidence pipeline and overall gate are not complete.
+- Incomplete reports must not be represented as complete evidence.
+
+**Required-suite quality-gate conditions**
+The gate should pass only when every required suite:
+1. Uses an artifact whose integrity and source provenance were verified.
+2. Completes execution.
+3. Executes the required test category (not merely exits Maven successfully).
+4. Has no blocking test failures.
+5. Publishes mandatory evidence that can be collected for reporting.
+
+**Knowledge checks completed**
+| Scenario | User's answer | Correct principle |
+|---|---|---|
+| API passed, Selenium failed, Playwright passed, reports generated | B | Fail the gate because a required suite failed; retain reports |
+| API and Selenium passed, required Playwright suite could not provision a runner | C | Fail the gate; report Playwright as NOT_STARTED and retain available evidence |
+| Maven exits successfully but API integration-test flag was omitted and zero tests ran | C | Fail the gate; validate executed test count/category, not only process exit code |
+
+**Project-specific test-selection reminder**
+The API tests are gated by `Boolean.getBoolean("integration.tests")`; the intended Maven invocation includes `-Dintegration.tests=true`. The quality gate/result verifier must catch a missing flag or other condition that causes the required suite to execute zero tests.
+
+**Next**
+- [ ] Define the exact JSON schema and allowed status transitions for suite result records.
+- [ ] Decide how to represent test failures versus infrastructure/prerequisite failures in the final gate summary.
+- [ ] Map the contract to the existing workflow jobs and reporting scripts.
+- [ ] Implement only after reviewing the proposed workflow changes; keep all work on `learning/ci-cd-quality-gates` and leave `master` untouched.
