@@ -584,3 +584,45 @@ This validates the current JAR's basic runtime behaviour and the two sample API 
 
 **Next step**
 Inspect the current branch diff and Maven POM change, then design the build job's artifact upload and the downstream jobs' download/start/readiness steps. Keep all changes on `learning/ci-cd-quality-gates`; leave `master` untouched.
+
+
+### Session 2 — continued: artifact provenance and remote-branch inspection (28 November 2026)
+
+**Artifact provenance**
+
+A build artifact should be traceable to the exact source revision and CI execution that produced it. Useful metadata includes:
+- Git commit SHA.
+- Workflow run ID (and run attempt where relevant).
+- Artifact name and version.
+- SHA-256 checksum.
+- Build timestamp.
+
+Traceability chain:
+
+`Git commit → CI workflow run → Build artifact → Test results → Deployment`
+
+**Release integrity principle:** deploy the exact artifact that passed the required tests. Do not rebuild during deployment, because a second build may produce a different binary from the one that was validated.
+
+**Knowledge check**
+
+Scenario: production has a defect and the deployed JAR came from an older commit even though the latest workflow passed. The user selected **B**: record and verify the commit SHA associated with every build artifact and deployment. Correct.
+
+**Actual remote branch inspection**
+
+Inspected the following files on `learning/ci-cd-quality-gates`:
+- `.github/workflows/automation-framework-ci.yml`
+- `automation-parent/sample-app/pom.xml`
+
+Findings:
+1. The current workflow still has one `test` job; API, Selenium and Playwright suites run sequentially in that job.
+2. The current workflow packages the sample app, but starts it using `mvn ... spring-boot:run`; it does not yet exercise the packaged JAR.
+3. The remote `sample-app/pom.xml` does not yet contain the locally tested Spring Boot `repackage` execution. The local fix therefore must be committed/pushed to the learning branch before the workflow can rely on the executable JAR.
+4. The workflow's `push` and `pull_request` triggers currently target `master`. It has `workflow_dispatch`, which can be used to run it manually against the learning branch. Branch-trigger policy should be deliberately updated as part of the learning-branch implementation, without changing `master`.
+5. The current workflow already generates Allure and Extent reports and uploads diagnostics with `if: always()`; the redesign must preserve this useful failure-diagnostic behaviour while separating suite jobs and report aggregation.
+
+**Next implementation prerequisites**
+- [ ] Commit and push the locally validated `sample-app/pom.xml` repackage change to `learning/ci-cd-quality-gates`.
+- [ ] Re-fetch the remote POM and confirm the execution is present.
+- [ ] Design a build job that packages, starts and smoke-tests the executable JAR before upload.
+- [ ] Make API, Selenium and Playwright jobs download the same immutable artifact and start independent app processes.
+- [ ] Preserve suite-specific result artifacts and the existing report/quality-gate behaviour.
