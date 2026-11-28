@@ -372,6 +372,71 @@ Append new concepts, code, decisions and validation results here as the learning
 4. Design report generation and quality-gate conditions.
 5. Implement the workflow on this branch and validate it.
 
+
+### Session 2 — continued: build artifact strategy, readiness and retries
+
+**Build once, test in parallel**
+
+We discussed a build job that packages the sample application once and uploads a runnable artifact. API, Selenium and Playwright jobs can each download the same binary and start their own local application process.
+
+Important points:
+- Sharing a JAR does not share a running process or a runner's `localhost`.
+- Each test job still needs its own application instance (unless using a separately managed shared test environment).
+- Verify the actual JAR filename, executable packaging, startup command and health endpoint before relying on illustrative YAML.
+- The sample module uses Spring Boot 3.4.2. The proposed artifact name `sample-app-1.0-SNAPSHOT.jar` was provisional and has not yet been verified by a clean build.
+
+**Artifact failure nuance**
+
+The correct response depends on where the failure occurs:
+- If the central build job fails to create/upload the required artifact, all test jobs that depend on that build should be skipped.
+- If the build succeeded but only the API job's individual artifact download fails, Selenium and Playwright should still proceed if their own downloads succeed. Jobs use independent runners; one job's download failure does not automatically invalidate another job's download.
+- Never silently fall back to a stale artifact or rebuild without recording the failure.
+
+The user's reasoning emphasized that a build failure should trigger investigation rather than allowing the pipeline to proceed with an uncertain binary. The key refinement is to distinguish a shared upstream artifact failure from an isolated per-job download failure.
+
+**Readiness checks: polling rather than fixed sleep**
+
+Avoid relying on a fixed delay such as `sleep 120`. Prefer polling a health/readiness endpoint at a bounded interval, with:
+- A defined maximum wait.
+- A short polling interval.
+- A clear success message when ready.
+- A non-zero exit when the timeout expires.
+- Application logs and diagnostic output on failure.
+
+An illustrative shell loop was discussed using a 90-second maximum wait and 3-second polling interval. It referenced `/actuator/health` as an example only; confirm that the sample app exposes this endpoint before adopting it.
+
+**Retry strategy and flaky tests**
+
+Retries should be limited and classified rather than applied indiscriminately:
+- Transient network/runner issues may justify a bounded retry.
+- Application startup failures should be diagnosed and may justify a controlled startup retry.
+- Assertion failures and incorrect API responses should not be hidden by automatic retries.
+- Browser crashes may justify a limited retry with diagnostic capture.
+
+A test that fails initially and passes on retry is still a flaky-test signal. Preserve first-attempt failure information, retry outcome, test name, duration, environment/browser details, screenshots and traces where available. Do not automatically treat a retry pass as proof of a clean run.
+
+**Knowledge checks completed in this continuation**
+
+| Topic | User's answer | Result / principle |
+|---|---|---|
+| Build artifact failure | A | Correct core principle: do not proceed with an unknown or missing build artifact; investigate. Refine by distinguishing central artifact production failure from one job's isolated download failure. |
+| Readiness check after app starts at 90 seconds but timeout is 60 seconds | B | Correct: bounded polling, sensible timeout and diagnostics on failure. |
+| 100 Playwright tests: 97 pass first try, 2 fail consistently, 1 passes only on retry | B | Correct: fail the quality gate, retain reports, distinguish deterministic failures from the flaky test. |
+
+**Newly completed concepts**
+- Build-once / test-in-parallel artifact pattern.
+- Failure isolation across dependent jobs.
+- Bounded readiness polling and startup diagnostics.
+- Retry classification and flaky-test visibility.
+- Quality gate should not be green merely because a retry eventually passed.
+
+**Next learning topics**
+1. Test parallelism: splitting suites, workers, shards and execution time.
+2. Resource contention: browser instances, CPU/memory, ports, test data and environment capacity.
+3. Concurrency and isolation: avoiding collisions between parallel test runs.
+4. Implement the verified build-artifact contract and independent test jobs on this learning branch.
+5. Implement robust reporting and quality-gate conditions; validate both green and intentionally failing runs.
+
 ### Further notes
 
 _Add new notes below this line. Keep this document as the ongoing source of truth for this CI/CD learning track._
