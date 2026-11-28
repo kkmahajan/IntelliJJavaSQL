@@ -22,10 +22,10 @@ A hands-on Java automation project built around a small **Service Desk** applica
 
 **Useful links**
 
-- [Latest CI workflow runs](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml)
-- [Latest published test dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/)
-- [Allure report](https://kkmahajan.github.io/IntelliJJavaSQL/allure/)
-- [Extent report](https://kkmahajan.github.io/IntelliJJavaSQL/extent/)
+- [Latest CI workflow runs](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml)
+- [Latest published test dashboard](https://kkmahajan.github.io/quality-engineering-framework/)
+- [Allure report](https://kkmahajan.github.io/quality-engineering-framework/allure/)
+- [Extent report](https://kkmahajan.github.io/quality-engineering-framework/extent/)
 - [Complete tutorial](docs/COMPLETE_TUTORIAL.md)
 - [Interview preparation](docs/INTERVIEW_PREPARATION.md)
 - [Java coding interview preparation](docs/JAVA_CODING_INTERVIEW_PREPARATION.md) — ten core Java topics, problem-solving patterns, complexity, SDET applications and exercises.
@@ -39,7 +39,7 @@ The published report links show the latest successfully deployed report. To insp
 The framework lives in `automation-parent/` and is independent of the repository's original SQL/JDBC practice code.
 
 ```text
-IntelliJJavaSQL/
+quality-engineering-framework/
 ├── .github/
 │   └── workflows/
 │       └── automation-framework-ci.yml
@@ -171,8 +171,8 @@ In the commands below, replace `mvn` with `& $mvn` when using the bundled execut
 ## 4. Get the project and build it
 
 ```powershell
-git clone https://github.com/kkmahajan/IntelliJJavaSQL.git
-cd IntelliJJavaSQL
+git clone https://github.com/kkmahajan/quality-engineering-framework.git
+cd quality-engineering-framework
 git pull --ff-only
 cd automation-parent
 
@@ -313,9 +313,9 @@ The reporting pipeline uses the structured Allure result JSON as the common sour
 
 | Report | Link | Best for |
 |---|---|---|
-| Interactive dashboard | [Open dashboard](https://kkmahajan.github.io/IntelliJJavaSQL/) | Filter and search test results |
-| Allure | [Open Allure](https://kkmahajan.github.io/IntelliJJavaSQL/allure/) | Individual test details, nested steps and attachments |
-| Extent Spark | [Open Extent](https://kkmahajan.github.io/IntelliJJavaSQL/extent/) | Consolidated test execution and category view |
+| Interactive dashboard | [Open dashboard](https://kkmahajan.github.io/quality-engineering-framework/) | Filter and search test results |
+| Allure | [Open Allure](https://kkmahajan.github.io/quality-engineering-framework/allure/) | Individual test details, nested steps and attachments |
+| Extent Spark | [Open Extent](https://kkmahajan.github.io/quality-engineering-framework/extent/) | Consolidated test execution and category view |
 
 These URLs show the latest successfully deployed run. For a specific CI run, use its Actions artifact.
 
@@ -379,7 +379,7 @@ Open `reports/latest/index.html`, `reports/latest/allure/index.html`, or `report
 
 Workflow file: [`.github/workflows/automation-framework-ci.yml`](../.github/workflows/automation-framework-ci.yml)
 
-[Open workflow runs](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml).
+[Open workflow runs](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml).
 
 ### Pipeline stages
 
@@ -400,7 +400,7 @@ The workflow has a concurrency group that cancels superseded pull-request runs; 
 
 ### Inspect one CI run
 
-1. Open the [workflow runs page](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml).
+1. Open the [workflow runs page](https://github.com/kkmahajan/quality-engineering-framework/actions/workflows/automation-framework-ci.yml).
 2. Select a run.
 3. Review each job step and its logs.
 4. Download `automation-framework-reports-<run-number>` under **Artifacts**.
