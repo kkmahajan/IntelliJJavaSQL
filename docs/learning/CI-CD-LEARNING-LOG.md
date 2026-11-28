@@ -947,3 +947,24 @@ Illustrative record:
 ```
 
 Knowledge check: user correctly selected **C** for a Selenium suite that ran 100 tests before the runner crashed. Correct principle: retain partial evidence, classify the run as incomplete, and do not infer a final pass/fail test outcome.
+
+
+## Session 4 — Final quality-gate design exercise and closeout
+
+### Final scenario
+
+- API: `COMPLETED / PASSED`, 120 tests executed, evidence uploaded.
+- Selenium: `INCOMPLETE / UNKNOWN`, 100 tests executed, evidence uploaded; runner crashed.
+- Playwright: `COMPLETED / PASSED`, 85 tests executed, evidence uploaded.
+- All artifacts passed checksum and commit verification.
+- Allure and Extent reports generated successfully from available results.
+
+**Correct quality-gate decision: FAIL.**
+
+The user selected **B** and correctly reasoned that a suite that does not complete requires investigation. Selenium is a required suite, so its `INCOMPLETE` execution blocks the gate. Partial evidence must be retained for diagnosis, but evidence upload and successful report generation do not turn an incomplete suite into a pass. The passing API and Playwright suites cannot compensate for the incomplete Selenium run.
+
+### Session 4 closeout
+
+Completed the final gate-design exercise. Key principle reinforced: the quality gate evaluates verified execution and test outcomes for every required suite; it must not infer success from partial results or successful reporting. Preserve partial evidence and the known infrastructure failure reason (`RUNNER_CRASH`) for investigation.
+
+**Next session:** move from architecture/design into a careful implementation plan. Reinspect the current workflow and define job dependencies, artifact handoffs, suite-result contract, and gate behavior before making workflow changes.
