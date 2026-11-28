@@ -2,7 +2,7 @@
 
 > **Status:** In progress — living document  
 > **Started:** 28 November 2026  
-> **Repository:** [kkmahajan/IntelliJJavaSQL](https://github.com/kkmahajan/IntelliJJavaSQL)  
+> **Repository:** [kkmahajan/quality-engineering-framework](https://github.com/kkmahajan/quality-engineering-framework)  
 > **Learning focus:** Lead SDET / Quality Engineering — CI architecture, parallel execution, artifact handling, reporting and release gates  
 > **Working branch:** `learning/ci-cd-quality-gates`
 
@@ -689,7 +689,7 @@ Knowledge check: production defect traced to a JAR from an older commit. User an
 
 #### B. Repository inspection and implementation status
 
-Repository: `kkmahajan/IntelliJJavaSQL`  
+Repository: `kkmahajan/quality-engineering-framework`  
 Working branch: `learning/ci-cd-quality-gates`
 
 **1. User's local Spring Boot packaging fix**
