@@ -626,3 +626,16 @@ Findings:
 - [ ] Design a build job that packages, starts and smoke-tests the executable JAR before upload.
 - [ ] Make API, Selenium and Playwright jobs download the same immutable artifact and start independent app processes.
 - [ ] Preserve suite-specific result artifacts and the existing report/quality-gate behaviour.
+
+
+### Session 2 — continued: local packaging fix confirmed on remote branch (28 November 2026)
+
+The user confirmed the local `sample-app/pom.xml` change was pushed to the CI/CD learning branch.
+
+**Remote verification**
+- The actual branch ref in GitHub is `learning/ci-cd-quality-gates`. The shorter ref `ci-cd-quality-gates` does not exist; the user's wording referred to the existing learning branch.
+- Re-fetched `automation-parent/sample-app/pom.xml` from `learning/ci-cd-quality-gates`.
+- Confirmed the Spring Boot Maven plugin now has an explicit `repackage` execution.
+- Remote POM blob SHA at verification: `9576514b62cef9707eb96e63826896e5a1844a23`.
+
+**Status:** The executable-JAR packaging fix is now present on the remote learning branch. The workflow itself remains unchanged and still runs suites sequentially. Next, inspect the parent/API/UI Maven configuration and test/report output paths before making the first workflow refactor. Keep changes on `learning/ci-cd-quality-gates`; do not modify `master`.
