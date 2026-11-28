@@ -926,3 +926,24 @@ The API tests are gated by `Boolean.getBoolean("integration.tests")`; the intend
 - [ ] Decide how to represent test failures versus infrastructure/prerequisite failures in the final gate summary.
 - [ ] Map the contract to the existing workflow jobs and reporting scripts.
 - [ ] Implement only after reviewing the proposed workflow changes; keep all work on `learning/ci-cd-quality-gates` and leave `master` untouched.
+
+
+**Further result-contract refinement — incomplete execution**
+- If a runner crashes after a suite has started, classify execution as `INCOMPLETE`, not `COMPLETED` or `NOT_STARTED`.
+- Set the final test outcome to `UNKNOWN` unless the framework can establish a reliable final outcome from persisted results.
+- Preserve the number of tests known to have executed and any partial result files.
+- Record the infrastructure failure reason (for example, `RUNNER_CRASH`). The final test outcome can be unknown even when the infrastructure failure reason is known.
+- A required suite with incomplete execution is blocking for the quality gate.
+
+Illustrative record:
+```json
+{
+  "suite": "SELENIUM",
+  "executionStatus": "INCOMPLETE",
+  "testOutcome": "UNKNOWN",
+  "testsExecuted": 100,
+  "failureReason": "RUNNER_CRASH"
+}
+```
+
+Knowledge check: user correctly selected **C** for a Selenium suite that ran 100 tests before the runner crashed. Correct principle: retain partial evidence, classify the run as incomplete, and do not infer a final pass/fail test outcome.
