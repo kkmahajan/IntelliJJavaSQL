@@ -537,3 +537,50 @@ A GitHub Actions matrix can create one job per shard. Setting `fail-fast: false`
 3. Inspect actual Maven module outputs and verify the runnable sample-app artifact.
 4. Design and implement the build-artifact contract and independent test jobs on this learning branch.
 5. Implement reporting and an explicit quality gate; validate both green and intentionally failing runs.
+
+
+### Session 2 — continued: executable Spring Boot artifact and runtime verification (28 November 2026)
+
+**Local Maven environment**
+- The standalone `mvn` command is not on the Windows PATH.
+- Located and used IntelliJ IDEA Community Edition 2025.2.1's bundled Maven executable:
+  `C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2025.2.1\\plugins\\maven-plugin\\lib\\maven3\\bin\\mvn.cmd`
+- Verified Maven 3.9.16 and Java runtime 25.0.1. The project compiler configuration compiled sources with Java release 21.
+- Build command, run from `automation-parent`:
+  `mvn -B -ntp -pl sample-app -am clean package -DskipTests`
+  (On this Windows machine, invoke the full `mvn.cmd` path with PowerShell's call operator `&`.)
+- Initial reactor build succeeded and produced `sample-app/target/sample-app-1.0-SNAPSHOT.jar` (23,455 bytes).
+
+**Packaging defect identified and fixed**
+- The initial JAR was not executable: `java -jar sample-app/target/sample-app-1.0-SNAPSHOT.jar` returned `no main manifest attribute`.
+- The existing `sample-app/pom.xml` declared `spring-boot-maven-plugin` with version `${spring-boot.version}`, but did not explicitly bind the `repackage` goal.
+- Added an execution for the Spring Boot Maven plugin's `repackage` goal, retaining the existing Surefire plugin.
+- After rebuilding, `java -jar` displayed the Spring Boot 3.4.2 startup banner. This confirms the JAR is now launching as a Spring Boot executable artifact. The complete startup log/ready message was not captured in the shared output, so endpoint verification is the stronger readiness evidence below.
+
+**Runtime endpoint verification**
+The application was running locally on port 8080. Both API checks returned HTTP 200:
+- `GET http://localhost:8080/api/users` returned `[{"id":1,"name":"John Watson","email":"john@example.com"}]`.
+- `GET http://localhost:8080/api/users/1` returned `{"id":1,"name":"John Watson","email":"john@example.com"}`.
+
+This validates the current JAR's basic runtime behaviour and the two sample API endpoints. It does not yet prove that all dependencies/background components are healthy, nor does it replace a clean-runner CI validation.
+
+**CI/CD implications**
+- The candidate build artifact name is now verified locally as `sample-app-1.0-SNAPSHOT.jar`.
+- Candidate startup command: `java -jar sample-app-1.0-SNAPSHOT.jar`.
+- The build job can package this JAR once and upload it; each downstream API/Selenium/Playwright job must download the artifact and start its own application process because GitHub Actions jobs have separate runners and separate `localhost` environments.
+- Before implementing the workflow, verify the exact artifact and startup behaviour on a clean Ubuntu runner, and define a bounded readiness poll against a confirmed endpoint. Do not assume `/actuator/health` exists; the two confirmed endpoints above can be used for a basic readiness check if appropriate.
+
+**Validation status**
+- [x] Locate and invoke bundled Maven.
+- [x] Build the sample-app module successfully.
+- [x] Identify actual JAR filename.
+- [x] Correct Spring Boot executable packaging with `repackage`.
+- [x] Launch the packaged JAR.
+- [x] Verify `/api/users` and `/api/users/1` return HTTP 200 and expected data.
+- [ ] Capture full startup/readiness log and confirm clean shutdown.
+- [ ] Verify same artifact on a clean GitHub Actions Ubuntu runner.
+- [ ] Define artifact upload/download contract and bounded readiness check.
+- [ ] Implement independent test jobs, reporting aggregation and quality gate.
+
+**Next step**
+Inspect the current branch diff and Maven POM change, then design the build job's artifact upload and the downstream jobs' download/start/readiness steps. Keep all changes on `learning/ci-cd-quality-gates`; leave `master` untouched.
