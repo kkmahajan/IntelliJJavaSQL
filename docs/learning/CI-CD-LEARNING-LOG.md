@@ -440,3 +440,100 @@ A test that fails initially and passes on retry is still a flaky-test signal. Pr
 ### Further notes
 
 _Add new notes below this line. Keep this document as the ongoing source of truth for this CI/CD learning track._
+
+
+### Session 2 — continued: resource isolation, parallelism levels and sharding
+
+**Resource contention**
+
+Parallelism is constrained by infrastructure capacity as well as test independence. Increasing worker count can increase throughput initially, but excessive concurrency may cause:
+- CPU saturation and slow browser operations.
+- Memory pressure, browser crashes or out-of-memory failures.
+- Network contention and delayed requests.
+- Database connection-pool exhaustion.
+- External API rate limits (for example, HTTP 429 responses).
+
+Tune concurrency using measured execution time, failure rate, CPU/memory use, browser stability and external-service limits. Do not assume that more workers always means faster or more reliable execution.
+
+**Test-data isolation and cleanup ownership**
+
+A shared mutable record can create race conditions. For example, two parallel tests updating the same customer to different statuses can produce order-dependent results. The preferred fix is independent test data, not simply more retries or disabling tests.
+
+Recommended approaches:
+- Generate unique records/accounts per test, worker or execution.
+- Use separate tenants, schemas or database fixtures where practical.
+- Give each worker independent browser contexts and sessions.
+- Assign mobile devices and ports explicitly when parallel execution requires them.
+- Use unique temporary directories and resource names.
+- Make cleanup ownership-aware: a test should delete only the resources it created.
+- Apply bounded throttling when external systems impose rate limits.
+
+An execution identifier can combine the CI run ID and worker ID, for example `45384443361-worker-2`, to make test resources traceable and unique. This is an illustrative naming pattern; use the actual workflow context and collision-safe naming in implementation.
+
+**GitHub Actions concurrency**
+
+A concurrency group controls overlapping workflow or job runs that share a group. Example:
+
+```yaml
+concurrency:
+  group: automation-${{ github.ref }}
+  cancel-in-progress: false
+```
+
+- `cancel-in-progress: false` avoids cancelling an already-running run when a newer run starts in the same group.
+- `cancel-in-progress: true` allows a newer run to cancel an in-progress run in that group.
+- Workflow concurrency does not isolate test data or tune Playwright workers inside a job.
+- Cancellation policy should account for whether diagnostics, report aggregation or deployment steps need to complete.
+
+**Three levels of parallelism**
+
+1. **Workflow level:** Separate workflows for distinct triggers or purposes, such as fast pull-request checks and full nightly regression. Avoid duplicating complete test execution without a reason.
+2. **Job level:** Run API, Selenium and Playwright as independent jobs. GitHub Actions jobs run in parallel unless dependencies such as `needs` serialize them. Each job has its own runner and must prepare its own reachable application/test environment.
+3. **Test-runner level:** Use workers or shards to distribute tests within a suite. Playwright supports commands such as:
+
+```bash
+npx playwright test --shard=1/4
+npx playwright test --shard=2/4
+npx playwright test --shard=3/4
+npx playwright test --shard=4/4
+```
+
+A GitHub Actions matrix can create one job per shard. Setting `fail-fast: false` allows other matrix jobs to continue when one shard fails, which can preserve diagnostic coverage. Shards still need independent test data and a deliberate report-aggregation strategy.
+
+**Sharding trade-offs**
+
+- Equal test counts do not guarantee equal execution durations. Distribute tests using historical durations when possible.
+- The slowest shard determines the end-to-end suite completion time.
+- More shards increase runner provisioning and artifact/reporting overhead.
+- Introduce sharding only after measuring that the suite is a bottleneck and confirming test isolation.
+
+**Recommended progression for this repository**
+
+1. Build once and run API, Selenium and Playwright in separate jobs.
+2. Measure each suite's duration and reliability.
+3. Verify test-data isolation and resource ownership.
+4. Introduce Playwright sharding only if it remains a bottleneck.
+5. Aggregate Allure results and attachments without collisions.
+6. Apply a quality gate after all required suites have completed.
+
+**Knowledge checks completed**
+
+| Scenario | User's answer | Correct principle |
+|---|---|---|
+| Eight Playwright workers reduce duration but cause intermittent failures due to a shared test user | B | Fix data isolation first; then tune concurrency against stability and capacity. |
+| Parallel API tests interfere because they share and delete the same customer | C | Use independent records and cleanup only resources created by each test. |
+| 240-test Playwright suite needs to be split to reduce execution time | A | Shard the suite with isolated data and report aggregation; balance by duration, not only test count. |
+
+**Newly completed concepts**
+- Resource contention and concurrency tuning.
+- Shared mutable test data, race conditions and ownership-aware cleanup.
+- GitHub Actions concurrency groups and cancellation trade-offs.
+- Workflow-, job- and test-runner-level parallelism.
+- Playwright sharding and its balancing/reporting trade-offs.
+
+**Next learning topics**
+1. Compare matrix jobs, Playwright workers and suite-level jobs with a concrete cost/runtime example.
+2. Review Allure's sharded result collection and safe aggregation requirements.
+3. Inspect actual Maven module outputs and verify the runnable sample-app artifact.
+4. Design and implement the build-artifact contract and independent test jobs on this learning branch.
+5. Implement reporting and an explicit quality gate; validate both green and intentionally failing runs.
