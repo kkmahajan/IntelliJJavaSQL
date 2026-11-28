@@ -7,43 +7,40 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Utils {
 
-    static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
+    // ObjectMapper and Gson are thread-safe and costly to build, so share one instance.
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Gson GSON = new Gson();
+    private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 
     /**
      * Convert a List<Map<String, Object>> to Json String
      * @param list as List<Map<String, Object>>
      * @return Json String
+     * @throws IllegalStateException if the rows cannot be converted
      */
     public static String listOfMapToJsonStringUsingJackson(List<Map<String, Object>> list) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = null;
         try {
-            jsonString = objectMapper.writeValueAsString(list);
+            return OBJECT_MAPPER.writeValueAsString(list);
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.WARNING, "JsonProcessingException while parsing the List<Map<String, Object>>", e);
+            throw new IllegalStateException("Unable to convert rows to JSON with Jackson", e);
         }
-        return jsonString;
     }
 
     /**
      * Convert a List<Map<String, Object>> to Json String using ObjectMapper with default pretty printer
      * @param list as List<Map<String, Object>>
      * @return  Json String
+     * @throws IllegalStateException if the rows cannot be converted
      */
     public static String listOfMapToPrettyJsonStringUsingJackson(List<Map<String, Object>> list) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = null;
         try {
-            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(list);
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.WARNING, "JsonProcessingException while parsing the List<Map<String, Object>>", e);
+            throw new IllegalStateException("Unable to convert rows to JSON with Jackson", e);
         }
-        return jsonString;
     }
 
     /**
@@ -52,7 +49,7 @@ public class Utils {
      * @return Json String
      */
     public static  String listOfMapToJsonStringUsingGson(List<Map<String, Object>> list){
-        return new Gson().toJson(list);
+        return GSON.toJson(list);
     }
 
     /**
@@ -61,7 +58,6 @@ public class Utils {
      * @return Json String
      */
     public static  String listOfMapToPrettyJsonStringUsingGson(List<Map<String, Object>> list){
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(list);
+        return PRETTY_GSON.toJson(list);
     }
 }

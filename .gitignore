@@ -37,3 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Generated test reports (built by CI, deployed to GitHub Pages) ###
+automation-parent/reports/

@@ -43,6 +43,45 @@ public class DatabaseUtilsTest {
     }
 
     @Test
+    public void shouldAcceptIpv6LoopbackWithoutTls() {
+        String url = "jdbc:mysql://[::1]:3306/dbo";
+        Assert.assertEquals(DatabaseUtils.secureJdbcUrl(url), url);
+    }
+
+    @Test
+    public void shouldRequireIdentityVerificationForRemoteIpv6Host() {
+        Assert.assertEquals(
+                DatabaseUtils.secureJdbcUrl("jdbc:mysql://[2001:db8::1]:3306/dbo"),
+                "jdbc:mysql://[2001:db8::1]:3306/dbo?sslMode=VERIFY_IDENTITY");
+    }
+
+    @Test
+    public void shouldRejectWeakSslModeEvenWhenItIsNotTheFirstOne() {
+        Assert.expectThrows(
+                IllegalArgumentException.class,
+                () -> DatabaseUtils.secureJdbcUrl(
+                        "jdbc:mysql://db.example.com:3306/dbo?sslMode=VERIFY_IDENTITY&sslMode=DISABLED"));
+    }
+
+    @Test
+    public void shouldRejectLegacySslFlagsForRemoteDatabase() {
+        Assert.expectThrows(
+                IllegalArgumentException.class,
+                () -> DatabaseUtils.secureJdbcUrl(
+                        "jdbc:mysql://db.example.com:3306/dbo?sslMode=VERIFY_IDENTITY&useSSL=false"));
+        Assert.expectThrows(
+                IllegalArgumentException.class,
+                () -> DatabaseUtils.secureJdbcUrl(
+                        "jdbc:mysql://db.example.com:3306/dbo?verifyServerCertificate=false"));
+    }
+
+    @Test
+    public void shouldKeepExplicitVerifyIdentityForRemoteDatabase() {
+        String url = "jdbc:mysql://db.example.com:3306/dbo?sslMode=verify_identity";
+        Assert.assertEquals(DatabaseUtils.secureJdbcUrl(url), url);
+    }
+
+    @Test
     public void shouldExecuteSimpleQueryUsingConnectionPool() {
         requireDatabaseCredentials();
 

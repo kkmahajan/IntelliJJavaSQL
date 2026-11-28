@@ -2,7 +2,7 @@
 
 > **Scope:** This is a hands-on explanation of the actual code in `automation-parent/`, through Phases 1–8 (including the Service Desk application, dual reporting and GitHub Pages deployment). It is not a generic framework template. Follow the paths and commands from this repository. Verified reporting CI: [successful GitHub Actions run 41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) (both reports generated and published). GitHub Pages deployment was added afterward and requires a separate successful deployment to verify the live URLs.
 >
-> **Branch safety:** Development is on `feature/multi-module-test-framework`. The CI workflow is limited to this branch; do not assume it runs on `master`.
+> **Branch and CI:** The CI workflow runs on pull requests and on pushes to `master` that touch `automation-parent/**`. Pages deployment happens from `master` only.
 
 ## Contents
 
@@ -49,13 +49,12 @@ Install Java **21 or newer**, Maven 3.x, Git and Google Chrome. Java 21 is the c
 ```powershell
 git clone https://github.com/kkmahajan/IntelliJJavaSQL.git
 cd IntelliJJavaSQL
-git switch feature/multi-module-test-framework
 cd automation-parent
 java -version
 mvn -version
 ```
 
-If you already have the repository, use `git switch feature/multi-module-test-framework`, `git pull --ff-only` and then `cd automation-parent`. On Windows, if `mvn` is not in PATH, use the bundled Maven executable from IntelliJ IDEA, e.g.:
+If you already have the repository, use `git pull --ff-only` and then `cd automation-parent`. On Windows, if `mvn` is not in PATH, use the bundled Maven executable from IntelliJ IDEA, e.g.:
 
 ```powershell
 $mvn = "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.2.1\plugins\maven\lib\maven3\bin\mvn.cmd"
@@ -352,9 +351,9 @@ Selenium and Playwright are **alternative UI automation implementations**, not t
 Open the workflow at repository root: `.github/workflows/automation-framework-ci.yml`.
 
 The YAML has:
-- **Trigger:** pushes to `feature/multi-module-test-framework` affecting `automation-parent/**` or the workflow file; manual `workflow_dispatch`.
-- **Permissions:** `contents: read` (least-privilege checkout).
-- **Concurrency:** newer runs on the same ref cancel older in-progress runs.
+- **Trigger:** pull requests and pushes to `master` affecting `automation-parent/**` or the workflow file; manual `workflow_dispatch`.
+- **Permissions:** `contents: read` for the whole workflow; only the separate `publish` job additionally gets `pages: write` and `id-token: write`.
+- **Concurrency:** newer pull-request runs cancel older in-progress runs on the same ref; runs on `master` are never cancelled.
 - **Runner:** `ubuntu-24.04`, pinned because the previous `ubuntu-latest` runner resolved to Ubuntu 26.04 and Playwright 1.56.x could not install Chromium there.
 - **Java:** Temurin 21 via `actions/setup-java@v4` with Maven dependency caching.
 - **Execution:** offline Maven reactor; package and launch Spring Boot; poll `GET /api/users/1`; run API integration; install Chrome; run Selenium; install Playwright Chromium; run Playwright.
@@ -411,7 +410,7 @@ A practical development workflow:
 4. Update `user.json` or `users.json` if the API contract intentionally changes.
 5. If the UI changes, update `index.html`, then centralize new Selenium selectors/actions in `UserManagerPage`.
 6. Add a focused Selenium or Playwright scenario for a user-visible workflow, using unique test data and cleanup.
-7. Run offline tests, start the app, run integration/browser suites, then push to the **feature branch** and inspect GitHub Actions.
+7. Run offline tests, start the app, run integration/browser suites, then open a pull request (or push to `master`) and inspect GitHub Actions.
 
 Suggested future learning exercises (not yet implemented): Playwright Page Objects, test tags, environment profiles, accessibility checks, Testcontainers with a real database, retry policies, and CI test-result summaries.
 
@@ -443,7 +442,7 @@ The verified CI baseline is **26 unique tests passing across stages**, not a gua
 - `reporting-tools/src/main/java/org/example/automation/reporting/ExtentReportGenerator.java` uses **ExtentReports 5.1.2** and its `ExtentSparkReporter` to generate an HTML report from `TEST-*.xml` files produced by Maven Surefire.
 - The CI workflow combines Allure result files from offline, API, Selenium, and Playwright stages in `target/combined-allure-results/`, then uses the Allure CLI to generate HTML at `reports/latest/allure/`.
 - The same CI job generates Extent at `reports/latest/extent/index.html` and creates a simple `reports/latest/index.html` linking both reports.
-- The reports are uploaded as a GitHub Actions artifact and committed under `automation-parent/reports/latest/` on the **feature branch**, with `[skip ci]` in the generated commit message.
+- The reports are uploaded as a GitHub Actions artifact and, on `master`, deployed to GitHub Pages. They are not committed to the repository (`automation-parent/reports/` is git-ignored).
 
 ### Reporting pipeline
 
@@ -483,7 +482,7 @@ To view the generated reports in GitHub source control, inspect `reports/latest/
 | Extent has no executed tests | Verify `TEST-*.xml` exists in the module's `target/surefire-reports/` and tests were not all skipped |
 | Only some UI results appear | Selenium and Playwright run separately; inspect the Allure collection steps and the Surefire XML overwrite behavior |
 | HTML works locally but not in GitHub's code viewer | Use GitHub Pages rather than the repository's source viewer |
-| Generated report commit triggers more CI runs | Confirm the bot commit uses `[skip ci]` and review the workflow trigger/path filters |
+| A test category shows no results but CI is green | The **Verify every test category executed** step should now fail the run; check the `-Dintegration.tests`, `-Dui.tests` and `-Dplaywright.tests` flags |
 
 ## 16. Phase 7: Publish both HTML reports using GitHub Pages
 
@@ -497,9 +496,9 @@ A report committed to GitHub is stored as a file, not served as a website. GitHu
 
 1. Open [Settings → Pages](https://github.com/kkmahajan/IntelliJJavaSQL/settings/pages).
 2. Under **Build and deployment**, select **Source: GitHub Actions**.
-3. Ensure Actions are enabled and that the workflow is allowed to deploy Pages. The workflow requests `pages: write` and `id-token: write`, plus `contents: write` for the existing report commit.
-4. Push a change to `automation-parent/**` or the workflow on `feature/multi-module-test-framework`, or manually run the workflow.
-5. In [Actions](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml), verify the steps **Configure GitHub Pages**, **Upload HTML reports as Pages artifact**, and **Deploy HTML reports to GitHub Pages** succeed.
+3. Ensure Actions are enabled and that the workflow is allowed to deploy Pages. Only the `publish` job requests `pages: write` and `id-token: write`; no job needs `contents: write`.
+4. Push or merge a change to `automation-parent/**` or the workflow on `master`, or manually run the workflow on `master`.
+5. In [Actions](https://github.com/kkmahajan/IntelliJJavaSQL/actions/workflows/automation-framework-ci.yml), verify the **Upload HTML reports as Pages artifact** step (in the `test` job) and the `publish` job's **Deploy HTML reports to GitHub Pages** step succeed.
 6. Visit **Settings → Pages** to confirm the live site address.
 
 ### How the workflow deploys the files
@@ -508,25 +507,27 @@ The report generation step creates `reports/latest/.nojekyll`, which prevents Je
 
 ```yaml
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read          # whole workflow
 
-# After generating both reports:
-- name: Configure GitHub Pages
-  if: success() && steps.reports.outcome == 'success'
-  uses: actions/configure-pages@v5
-
+# In the test job, after generating both reports (master only, never on pull requests):
 - name: Upload HTML reports as Pages artifact
-  if: success() && steps.reports.outcome == 'success'
+  if: success() && steps.reports.outcome == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
   uses: actions/upload-pages-artifact@v3
   with:
     path: automation-parent/reports/latest
 
-- name: Deploy HTML reports to GitHub Pages
-  if: success() && steps.reports.outcome == 'success'
-  id: pages
-  uses: actions/deploy-pages@v4
+# A separate job, the only one with Pages permissions:
+publish:
+  needs: test
+  permissions:
+    pages: write
+    id-token: write
+  environment:
+    name: github-pages
+  steps:
+    - name: Deploy HTML reports to GitHub Pages
+      id: pages
+      uses: actions/deploy-pages@v4
 ```
 
 The directory `automation-parent/reports/latest/` becomes the **root** of the Pages website. The expected URLs are:
@@ -542,21 +543,21 @@ These are **expected**, not proof that deployment has completed. If GitHub Pages
 ### CI flow after Phase 7
 
 ```text
-Feature-branch push or manual dispatch
+Pull request, push to master, or manual dispatch
   -> Java build and offline tests
   -> Start Spring Boot and verify readiness
   -> API + Selenium + Playwright tests
-  -> Generate Allure + Extent HTML
-  -> Commit generated reports to feature branch [skip ci]
-  -> Configure Pages -> Upload Pages artifact -> Deploy Pages
+  -> Generate Allure + Extent HTML and the dashboard
+  -> Verify every test category executed
+  -> (master only) Upload Pages artifact -> publish job deploys Pages
   -> Upload test logs and report artifacts
 ```
 
 ### Security and operational considerations
 
 - GitHub Pages sites are generally **publicly viewable**. Never include secrets, tokens, personal data, or confidential test payloads in test names, logs, attachments, or screenshots.
-- Pages is a repository-level site, not a separate private site for the feature branch. The workflow publishes from the feature branch but does **not** merge into or change `master`.
-- The current pipeline commits generated report assets into source control **and** deploys them to Pages. This is intentional for the requested implementation, but generated HTML can make repository history large over time.
+- Pages is a repository-level site, not a separate private site. The workflow publishes only from `master`.
+- Generated report assets are **not** committed to source control. They are deployed to Pages from an artifact and uploaded as 14-day CI artifacts, so repository history stays small.
 - If Pages deployment fails, check the GitHub Actions job and repository Pages settings before changing Java tests. The report-generation and Pages-deployment stages are distinct.
 
 ## 17. Phase 8: Service Desk business workflow and scalable testing

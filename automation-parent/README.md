@@ -2,8 +2,7 @@
 
 A hands-on Java automation project built around a small **Service Desk** application. It demonstrates how to structure and execute unit, API, browser UI, and BDD tests in a Maven multi-module repository, then publish detailed execution evidence through **Allure**, **Extent Spark**, and a searchable GitHub Pages dashboard.
 
-> **Current development branch:** `feature/multi-module-test-framework`  
-> All framework work and CI report publishing are scoped to this branch. The repository's `master` branch is not the target of this framework workflow.
+> **Branch and CI:** The CI workflow runs on pull requests and on pushes to `master` that touch `automation-parent/**`. Reports are deployed to GitHub Pages from `master` only; pull requests run every test without publishing.
 
 ## Project at a glance
 
@@ -65,7 +64,7 @@ IntelliJJavaSQL/
 │   ├── docs/
 │   │   ├── COMPLETE_TUTORIAL.md
 │   │   └── INTERVIEW_PREPARATION.md
-│   └── reports/latest/                 # Generated reports (CI output)
+│   └── reports/latest/                 # Generated reports (CI output, git-ignored)
 └── README.md                           # Original SQL/JDBC project overview
 ```
 
@@ -174,7 +173,6 @@ In the commands below, replace `mvn` with `& $mvn` when using the bundled execut
 ```powershell
 git clone https://github.com/kkmahajan/IntelliJJavaSQL.git
 cd IntelliJJavaSQL
-git switch feature/multi-module-test-framework
 git pull --ff-only
 cd automation-parent
 
@@ -385,7 +383,7 @@ Workflow file: [`.github/workflows/automation-framework-ci.yml`](../.github/work
 
 ### Pipeline stages
 
-1. Check out `feature/multi-module-test-framework`.
+1. Check out the pushed or pull-request commit (read-only token).
 2. Set up Temurin Java 21 and Maven dependency caching.
 3. Run offline/default tests.
 4. Package and start the sample Spring Boot app.
@@ -395,10 +393,10 @@ Workflow file: [`.github/workflows/automation-framework-ci.yml`](../.github/work
 8. Install Playwright Chromium and run the Playwright Cucumber scenario.
 9. Collect Allure results and the Cucumber JSON report.
 10. Classify results, generate Allure and Extent HTML, and build the dashboard.
-11. Commit generated reports back to the feature branch.
-12. Upload report/test artifacts and deploy the report folder to GitHub Pages when the workflow succeeds.
+11. Fail the build if any test category (Unit, API, Selenium, Playwright) executed zero tests, because a skipped suite would otherwise look green.
+12. Upload report/test artifacts. On `master` only, a separate `publish` job (the only job with Pages permissions) deploys the report folder to GitHub Pages.
 
-The workflow has a concurrency group to cancel superseded runs on the same ref. Generated report commits use `[skip ci]` to avoid recursively triggering the workflow. CI artifacts are configured for 14-day retention.
+The workflow has a concurrency group that cancels superseded pull-request runs; runs on `master` are never cancelled mid-publish. Generated reports are not committed to the repository: they are uploaded as artifacts and deployed to Pages. CI artifacts are configured for 14-day retention.
 
 ### Inspect one CI run
 
@@ -453,11 +451,11 @@ This is an educational demo and test framework, not a production application.
 
 ## Contribution workflow
 
-1. Work on `feature/multi-module-test-framework` for this framework.
+1. Work on a branch and open a pull request against `master`; CI runs the full suite on the pull request.
 2. Keep tests isolated, deterministic and safe to rerun.
 3. Add or update tests alongside application behavior changes.
 4. Run the relevant local test stages and inspect reports.
-5. Confirm the feature-branch GitHub Actions workflow succeeds.
+5. Confirm the pull request's GitHub Actions workflow succeeds.
 6. Keep documentation aligned with the implementation and its verified state.
 
-Do not push framework changes to `master` unless the repository owner explicitly changes that instruction.
+Prefer pull requests over direct pushes to `master`.

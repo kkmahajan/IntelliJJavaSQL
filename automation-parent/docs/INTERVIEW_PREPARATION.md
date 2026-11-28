@@ -1,7 +1,7 @@
 # Interview Preparation — Java Multi-Module Test Automation Framework
 
 > **Project:** Service Desk Application + Java Multi-Module Test Automation Framework  
-> **Repository:** [IntelliJJavaSQL — feature/multi-module-test-framework](https://github.com/kkmahajan/IntelliJJavaSQL/tree/feature/multi-module-test-framework/automation-parent)  
+> **Repository:** [IntelliJJavaSQL](https://github.com/kkmahajan/IntelliJJavaSQL/tree/master/automation-parent)  
 > **Stack:** Java 21, Maven, JUnit 5, Mockito, REST Assured, WireMock, JSON Schema, Selenium WebDriver, Playwright Java, Spring Boot, GitHub Actions, Allure, ExtentReports, GitHub Pages  
 > **Verified CI baseline:** [Successful run #41225043401](https://github.com/kkmahajan/IntelliJJavaSQL/actions/runs/41225043401) — tests and dual-report generation/publication succeeded. GitHub Pages deployment was added later; verify its own CI step before claiming the live URLs work.
 
@@ -133,7 +133,7 @@ Selenium let me demonstrate established WebDriver automation with the Page Objec
 
 ### Q8. How does your CI/CD pipeline work?
 
-GitHub Actions triggers on relevant pushes to the feature branch or through manual dispatch. It checks out code, configures Temurin Java 21, runs offline tests, starts the Spring Boot app, and polls an API endpoint until the app is ready. It then runs REST Assured/schema tests, Selenium tests, and Playwright tests in separate stages. Surefire reports, application logs, and failure screenshots are uploaded as artifacts.
+GitHub Actions triggers on pull requests and on relevant pushes to `master`, or through manual dispatch. It checks out code, configures Temurin Java 21, runs offline tests, starts the Spring Boot app, and polls an API endpoint until the app is ready. It then runs REST Assured/schema tests, Selenium tests, and Playwright tests in separate stages. Surefire reports, application logs, and failure screenshots are uploaded as artifacts.
 
 ### Q9. Describe a technical challenge you solved.
 
@@ -161,7 +161,7 @@ I configured the GitHub Actions workflow to generate both report directories, cr
 
 ### Q15. What is the difference between GitHub Actions artifacts and GitHub Pages?
 
-Actions artifacts are downloadable build outputs with a retention period; they are useful for diagnostics and archiving. GitHub Pages serves static HTML and assets over HTTPS, letting users open interactive reports directly in a browser. Our workflow also commits generated HTML to the feature branch, but GitHub's code viewer is not equivalent to website hosting.
+Actions artifacts are downloadable build outputs with a retention period; they are useful for diagnostics and archiving. GitHub Pages serves static HTML and assets over HTTPS, letting users open interactive reports directly in a browser. Our workflow does not commit generated HTML to the repository; it deploys it to Pages from an artifact, because GitHub's code viewer is not equivalent to website hosting and committed reports bloat history.
 
 ### Q16. How do you handle sensitive information in published reports?
 
